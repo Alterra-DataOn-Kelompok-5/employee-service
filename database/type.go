@@ -33,7 +33,7 @@ func (conf mysqlConfig) Connect() {
 
 	var err error
 
-	dbConn, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
