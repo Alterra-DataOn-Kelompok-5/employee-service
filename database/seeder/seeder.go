@@ -1,13 +1,16 @@
 package seeder
 
-import "gorm.io/gorm"
+import (
+	"github.com/Alterra-DataOn-Kelompok-5/employee-service/database"
+	"gorm.io/gorm"
+)
 
 type seed struct {
 	DB *gorm.DB
 }
 
-func NewSeeder(db *gorm.DB) *seed {
-	return &seed{db}
+func NewSeeder() *seed {
+	return &seed{database.GetConnection()}
 }
 
 func (s *seed) All() {

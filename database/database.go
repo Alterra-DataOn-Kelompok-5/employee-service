@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	DB *gorm.DB
+	dbConn *gorm.DB
 	once sync.Once
 )
 
@@ -29,8 +29,8 @@ func CreateConnection() {
 }
 
 func GetConnection() *gorm.DB {
-	if DB == nil {
+	if dbConn == nil {
 		CreateConnection()
 	}
-	return DB
+	return dbConn
 }

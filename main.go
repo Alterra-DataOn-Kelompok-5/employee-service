@@ -2,43 +2,69 @@ package main
 
 import (
 	"flag"
+	"os"
 
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/database"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/database/migration"
+	"github.com/Alterra-DataOn-Kelompok-5/employee-service/database/seeder"
+	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/factory"
+	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/http"
+	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/middleware"
 	"github.com/joho/godotenv"
+	"github.com/labstack/echo/v4"
 )
 
 func init() {
 	if err := godotenv.Load(); err != nil {
 		panic(err)
 	}
+	database.GetConnection()
 }
 
 func main() {
 	database.CreateConnection()
 
 	var m string // for check migration
+	var s string // for check seeder
 
 	flag.StringVar(
 		&m,
-		"migrate",
-		"migrate",
+		"m",
+		"none",
 		`this argument for check if user want to migrate table, rollback table, or status migration
 to use this flag:
-	use -migrate=migrate for migrate table
-	use -migrate=rollback for rollback table
-	use -migrate=status for get status migration`,
+	use -m=migrate for migrate table
+	use -m=rollback for rollback table
+	use -m=status for get status migration`,
 	)
-	flag.Parse()
+
+	flag.StringVar(
+		&s,
+		"s",
+		"none",
+		`this argument for check if user want to seed table
+to use this flag:
+	use -s=all to seed all table`,
+	)
 
 	if m == "migrate" {
 		migration.Migrate()
-		return
 	} else if m == "rollback" {
 		migration.Rollback()
-		return
 	} else if m == "status" {
 		migration.Status()
-		return
 	}
+
+	if s == "all" {
+		seeder.NewSeeder().All()
+	}
+
+	f := factory.NewFactory()
+	e := echo.New()
+	
+	middleware.LogMiddlewares(e)
+
+	http.NewHttp(e, f)
+
+	e.Logger.Fatal(e.Start(":" + os.Getenv("APP_PORT")))
 }

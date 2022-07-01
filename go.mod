@@ -31,4 +31,6 @@ require (
 	github.com/jinzhu/now v1.1.4 // indirect
 	github.com/joho/godotenv v1.4.0
 	github.com/labstack/echo/v4 v4.7.2
+	github.com/pkg/errors v0.9.1
+	github.com/sirupsen/logrus v1.8.1
 )
