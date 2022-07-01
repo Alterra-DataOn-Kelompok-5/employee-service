@@ -6,4 +6,5 @@ import (
 
 func (h *handler) Route(g *echo.Group) {
 	g.POST("/login", h.LoginByEmailAndPassword)
+	g.POST("/signup", h.RegisterByEmailAndPassword)
 }

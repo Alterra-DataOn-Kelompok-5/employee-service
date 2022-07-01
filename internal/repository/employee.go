@@ -13,7 +13,8 @@ type Employee interface {
 	FindAll(ctx context.Context, payload *dto.SearchGetRequest, p *dto.Pagination) ([]model.Employee, *dto.PaginationInfo, error)
 	FindByID(ctx context.Context, id uint) (model.Employee, error)
 	FindByEmail(ctx context.Context, email *string) (*model.Employee, error)
-	// Save(ctx context.Context, employee *dto.RegisterUserRequestBody) (model.Employee, error)
+	ExistByEmail(ctx context.Context, email *string) (bool, error)
+	Save(ctx context.Context, employee *dto.RegisterEmployeeRequestBody) (model.Employee, error)
 }
 
 type employee struct {
@@ -62,4 +63,32 @@ func (r *employee) FindByEmail(ctx context.Context, email *string) (*model.Emplo
 		return nil, err
 	}
 	return &data, nil
+}
+
+func (r *employee) ExistByEmail(ctx context.Context, email *string) (bool, error) {
+	var (
+		count   int64
+		isExist bool
+	)
+	if err := r.Db.WithContext(ctx).Model(&model.Employee{}).Where("email = ?", email).Count(&count).Error; err != nil {
+		return isExist, err
+	}
+	if count > 0 {
+		isExist = true
+	}
+	return isExist, nil
+}
+
+func (r *employee) Save(ctx context.Context, employee *dto.RegisterEmployeeRequestBody) (model.Employee, error) {
+	newEmployee := model.Employee{
+		Fullname: employee.Fullname,
+		Email: employee.Email,
+		Password: employee.Password,
+		RoleID: *employee.RoleID,
+		DivisionID: *employee.DivisionID,
+	}
+	if err := r.Db.WithContext(ctx).Save(&newEmployee).Error; err != nil {
+		return newEmployee, err
+	}
+	return newEmployee, nil
 }

@@ -19,7 +19,7 @@ func NewHandler(f *factory.Factory) *handler {
 }
 
 func (h *handler) LoginByEmailAndPassword(c echo.Context) error {
-	payload := new(dto.LoginByEmailAndPasswordRequest)
+	payload := new(dto.ByEmailAndPasswordRequest)
 	if err := c.Bind(payload); err != nil {
 		return res.ErrorBuilder(&res.ErrorConstant.BadRequest, err).Send(c)
 	}
@@ -28,6 +28,24 @@ func (h *handler) LoginByEmailAndPassword(c echo.Context) error {
 	}
 
 	employee, err := h.service.LoginByEmailAndPassword(c.Request().Context(), payload)
+	if err != nil {
+		return res.ErrorResponse(err).Send(c)
+	}
+
+	return res.SuccessResponse(employee).Send(c)
+}
+
+func (h *handler) RegisterByEmailAndPassword(c echo.Context) error {
+	payload := new(dto.RegisterEmployeeRequestBody)
+	if err := c.Bind(payload); err != nil {
+		return res.ErrorBuilder(&res.ErrorConstant.BadRequest, err).Send(c)
+	}
+	if err := c.Validate(payload); err != nil {
+		return res.ErrorBuilder(&res.ErrorConstant.Validation, err).Send(c)
+	}
+	payload.FillDefaults()
+
+	employee, err := h.service.RegisterByEmailAndPassword(c.Request().Context(), payload)
 	if err != nil {
 		return res.ErrorResponse(err).Send(c)
 	}
