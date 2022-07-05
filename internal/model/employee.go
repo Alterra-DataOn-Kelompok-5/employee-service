@@ -7,6 +7,6 @@ type Employee struct {
 	RoleID     uint   `json:"role_id"`
 	Role       Role
 	DivisionID uint `json:"division_id"`
-	Division    Division
+	Division   Division
 	Common
 }

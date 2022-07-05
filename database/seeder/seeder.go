@@ -13,11 +13,14 @@ func NewSeeder() *seed {
 	return &seed{database.GetConnection()}
 }
 
-func (s *seed) All() {
-	s.DB.Exec("DELETE FROM employees")
-	s.DB.Exec("DELETE FROM divisions")
-	s.DB.Exec("DELETE FROM roles")
+func (s *seed) SeedAll() {
 	roleSeeder(s.DB)
 	divisionSeeder(s.DB)
 	employeeSeeder(s.DB)
+}
+
+func (s *seed) DeleteAll() {
+	s.DB.Exec("DELETE FROM employees")
+	s.DB.Exec("DELETE FROM divisions")
+	s.DB.Exec("DELETE FROM roles")
 }

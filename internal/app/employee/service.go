@@ -17,6 +17,7 @@ type service struct {
 type Service interface {
 	Find(ctx context.Context, payload *dto.SearchGetRequest) (*dto.SearchGetResponse[dto.EmployeeResponse], error)
 	FindByID(ctx context.Context, payload *dto.ByIDRequest) (*dto.EmployeeResponse, error)
+	UpdateById(ctx context.Context, payload *dto.UpdateEmployeeRequestBody) (*dto.EmployeeDetailResponse, error)
 }
 
 func NewService(f *factory.Factory) Service {
@@ -65,6 +66,39 @@ func (s *service) FindByID(ctx context.Context, payload *dto.ByIDRequest) (*dto.
 		ID:       data.ID,
 		Fullname: data.Fullname,
 		Email:    data.Email,
+	}
+
+	return result, nil
+}
+
+func (s *service) UpdateById(ctx context.Context, payload *dto.UpdateEmployeeRequestBody) (*dto.EmployeeDetailResponse, error) {
+	employee, err := s.EmployeeRepository.FindByID(ctx, *payload.ID)
+	if err != nil {
+		if err == constant.RecordNotFound {
+			return &dto.EmployeeDetailResponse{}, res.ErrorBuilder(&res.ErrorConstant.NotFound, err)
+		}
+		return &dto.EmployeeDetailResponse{}, res.ErrorBuilder(&res.ErrorConstant.InternalServerError, err)
+	}
+
+	data, err := s.EmployeeRepository.Edit(ctx, employee, payload)
+	if err != nil {
+		return &dto.EmployeeDetailResponse{}, res.ErrorBuilder(&res.ErrorConstant.InternalServerError, err)
+	}
+
+	result := &dto.EmployeeDetailResponse{
+		EmployeeResponse: dto.EmployeeResponse{
+			ID:       data.ID,
+			Fullname: data.Fullname,
+			Email:    data.Email,
+		},
+		Role: dto.RoleResponse{
+			ID:   data.Role.ID,
+			Name: data.Role.RoleName,
+		},
+		Division: dto.DivisionResponse{
+			ID:   data.Division.ID,
+			Name: data.Division.DivisionName,
+		},
 	}
 
 	return result, nil

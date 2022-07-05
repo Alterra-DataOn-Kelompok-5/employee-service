@@ -9,17 +9,28 @@ import (
 
 var (
 	dbConn *gorm.DB
-	once sync.Once
+	once   sync.Once
 )
 
-func CreateConnection() {
+func getenv(key, fallback string) string {
+	var (
+		val     string
+		isExist bool
+	)
+	val, isExist = os.LookupEnv(key)
+	if !isExist {
+		val = fallback
+	}
+	return val
+}
 
+func CreateConnection() {
 	conf := dbConfig{
-		User: os.Getenv("DB_USER"),
-		Pass: os.Getenv("DB_PASS"),
-		Host: os.Getenv("DB_HOST"),
-		Port: os.Getenv("DB_PORT"),
-		Name: os.Getenv("DB_NAME"),
+		User: getenv("DB_USER", "root"),
+		Pass: getenv("DB_PASS", "1234567890"),
+		Host: getenv("DB_HOST", "localhost"),
+		Port: getenv("DB_PORT", "3306"),
+		Name: getenv("DB_NAME", "employee_svc"),
 	}
 
 	mysql := mysqlConfig{dbConfig: conf}
