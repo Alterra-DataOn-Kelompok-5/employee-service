@@ -63,7 +63,6 @@ func (h *handler) UpdateById(c echo.Context) error {
 	if err := c.Validate(payload); err != nil {
 		return res.ErrorBuilder(&res.ErrorConstant.Validation, err).Send(c)
 	}
-
 	result, err := h.service.UpdateById(c.Request().Context(), payload)
 	if err != nil {
 		return res.ErrorResponse(err).Send(c)
@@ -72,4 +71,18 @@ func (h *handler) UpdateById(c echo.Context) error {
 	return res.SuccessResponse(result).Send(c)
 }
 
-// func (h *handler) DeleteById(c echo.Context) error {}
+func (h *handler) DeleteById(c echo.Context) error {
+	payload := new(dto.ByIDRequest)
+	if err := c.Bind(payload); err != nil {
+		return res.ErrorBuilder(&res.ErrorConstant.BadRequest, err).Send(c)
+	}
+	if err := c.Validate(payload); err != nil {
+		return res.ErrorBuilder(&res.ErrorConstant.Validation, err).Send(c)
+	}
+	result, err := h.service.DeleteById(c.Request().Context(), payload)
+	if err != nil {
+		return res.ErrorResponse(err).Send(c)
+	}
+
+	return res.SuccessResponse(result).Send(c)
+}

@@ -12,12 +12,13 @@ import (
 
 type Employee interface {
 	FindAll(ctx context.Context, payload *dto.SearchGetRequest, p *dto.Pagination) ([]model.Employee, *dto.PaginationInfo, error)
-	FindByID(ctx context.Context, id uint) (model.Employee, error)
+	FindByID(ctx context.Context, id uint, usePreload bool) (model.Employee, error)
 	FindByEmail(ctx context.Context, email *string) (*model.Employee, error)
 	ExistByEmail(ctx context.Context, email *string) (bool, error)
 	ExistByID(ctx context.Context, id uint) (bool, error)
 	Save(ctx context.Context, employee *dto.RegisterEmployeeRequestBody) (model.Employee, error)
-	Edit(ctx context.Context, oldEmployee model.Employee, updateData *dto.UpdateEmployeeRequestBody) (*model.Employee, error)
+	Edit(ctx context.Context, oldEmployee *model.Employee, updateData *dto.UpdateEmployeeRequestBody) (*model.Employee, error)
+	Destroy(ctx context.Context, employee *model.Employee) (*model.Employee, error)
 }
 
 type employee struct {
@@ -53,9 +54,13 @@ func (r *employee) FindAll(ctx context.Context, payload *dto.SearchGetRequest, p
 	return users, dto.CheckInfoPagination(pagination, count), err
 }
 
-func (r *employee) FindByID(ctx context.Context, id uint) (model.Employee, error) {
+func (r *employee) FindByID(ctx context.Context, id uint, usePreload bool) (model.Employee, error) {
 	var user model.Employee
-	err := r.Db.WithContext(ctx).Model(&model.Employee{}).Where("id = ?", id).First(&user).Error
+	q := r.Db.WithContext(ctx).Model(&model.Employee{}).Where("id = ?", id)
+	if usePreload {
+		q = q.Preload("Division").Preload("Role")
+	}
+	err := q.First(&user).Error
 	return user, err
 }
 
@@ -110,7 +115,7 @@ func (r *employee) Save(ctx context.Context, employee *dto.RegisterEmployeeReque
 	return newEmployee, nil
 }
 
-func (r *employee) Edit(ctx context.Context, oldEmployee model.Employee, updateData *dto.UpdateEmployeeRequestBody) (*model.Employee, error) {
+func (r *employee) Edit(ctx context.Context, oldEmployee *model.Employee, updateData *dto.UpdateEmployeeRequestBody) (*model.Employee, error) {
 	if updateData.Fullname != nil {
 		oldEmployee.Fullname = *updateData.Fullname
 	}
@@ -120,7 +125,7 @@ func (r *employee) Edit(ctx context.Context, oldEmployee model.Employee, updateD
 	if updateData.Password != nil {
 		hashedPassword, err := util.HashPassword(*updateData.Password)
 		if err != nil {
-			return &oldEmployee, err
+			return nil, err
 		}
 		oldEmployee.Password = hashedPassword
 	}
@@ -131,14 +136,22 @@ func (r *employee) Edit(ctx context.Context, oldEmployee model.Employee, updateD
 		oldEmployee.RoleID = *updateData.RoleID
 	}
 
-	if err := r.Db.WithContext(ctx).Save(&oldEmployee).Error; err != nil {
-		return &oldEmployee, err
+	if err := r.Db.
+		WithContext(ctx).
+		Save(oldEmployee).
+		Preload("Division").
+		Preload("Role").
+		Find(oldEmployee).
+		Error; err != nil {
+		return nil, err
 	}
 
-	var employee model.Employee
-	if err := r.Db.WithContext(ctx).Preload("Division").Preload("Role").Where("id = ?", oldEmployee.ID).Find(&employee).Error; err != nil {
-		return &oldEmployee, err
-	}
+	return oldEmployee, nil
+}
 
-	return &employee, nil
+func (r *employee) Destroy(ctx context.Context, employee *model.Employee) (*model.Employee, error) {
+	if err := r.Db.WithContext(ctx).Delete(employee).Error; err != nil {
+		return nil, err
+	}
+	return employee, nil
 }
