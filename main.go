@@ -56,7 +56,8 @@ to use this flag:
 	}
 
 	if s == "all" {
-		seeder.NewSeeder().All()
+		seeder.NewSeeder().DeleteAll()
+		seeder.NewSeeder().SeedAll()
 	}
 
 	f := factory.NewFactory()
