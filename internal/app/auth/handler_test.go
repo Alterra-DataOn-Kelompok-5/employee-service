@@ -28,11 +28,13 @@ func TestHandlerLoginByEmailAndPasswordInvalidPayload(t *testing.T) {
 	c, rec := echoMock.RequestMock(http.MethodPost, "/", nil)
 	c.SetPath("/auth/login")
 
-	// testing
+	// setup handler
 	asserts := assert.New(t)
 	db := database.GetConnection()
 	factory := factory.Factory{EmployeeRepository: repository.NewEmployeeRepository(db)}
 	authHandler := NewHandler(&factory)
+	
+	// testing
 	if asserts.NoError(authHandler.LoginByEmailAndPassword(c)) {
 		asserts.Equal(400, rec.Code)
 

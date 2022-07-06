@@ -1,5 +1,11 @@
 package dto
 
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
+
 type (
 	RegisterEmployeeRequestBody struct {
 		Fullname   string `json:"fullname" validate:"required"`
@@ -32,6 +38,12 @@ type (
 	EmployeeWithJWTResponse struct {
 		EmployeeResponse
 		JWT string `json:"jwt"`
+	}
+	EmployeeWithCUDResponse struct {
+		EmployeeResponse
+		CreatedAt time.Time       `json:"created_at"`
+		UpdatedAt time.Time       `json:"updated_at"`
+		DeletedAt *gorm.DeletedAt `json:"deleted_at"`
 	}
 	EmployeeDetailResponse struct {
 		EmployeeResponse

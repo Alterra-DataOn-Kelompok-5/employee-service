@@ -16,8 +16,9 @@ type service struct {
 
 type Service interface {
 	Find(ctx context.Context, payload *dto.SearchGetRequest) (*dto.SearchGetResponse[dto.EmployeeResponse], error)
-	FindByID(ctx context.Context, payload *dto.ByIDRequest) (*dto.EmployeeResponse, error)
+	FindByID(ctx context.Context, payload *dto.ByIDRequest) (*dto.EmployeeDetailResponse, error)
 	UpdateById(ctx context.Context, payload *dto.UpdateEmployeeRequestBody) (*dto.EmployeeDetailResponse, error)
+	DeleteById(ctx context.Context, payload *dto.ByIDRequest) (*dto.EmployeeWithCUDResponse, error)
 }
 
 func NewService(f *factory.Factory) Service {
@@ -51,37 +52,12 @@ func (s *service) Find(ctx context.Context, payload *dto.SearchGetRequest) (*dto
 	return result, nil
 }
 
-func (s *service) FindByID(ctx context.Context, payload *dto.ByIDRequest) (*dto.EmployeeResponse, error) {
-	var result *dto.EmployeeResponse
-
-	data, err := s.EmployeeRepository.FindByID(ctx, payload.ID)
-	if err != nil {
-		if err == constant.RecordNotFound {
-			return result, res.ErrorBuilder(&res.ErrorConstant.NotFound, err)
-		}
-		return result, res.ErrorBuilder(&res.ErrorConstant.InternalServerError, err)
-	}
-
-	result = &dto.EmployeeResponse{
-		ID:       data.ID,
-		Fullname: data.Fullname,
-		Email:    data.Email,
-	}
-
-	return result, nil
-}
-
-func (s *service) UpdateById(ctx context.Context, payload *dto.UpdateEmployeeRequestBody) (*dto.EmployeeDetailResponse, error) {
-	employee, err := s.EmployeeRepository.FindByID(ctx, *payload.ID)
+func (s *service) FindByID(ctx context.Context, payload *dto.ByIDRequest) (*dto.EmployeeDetailResponse, error) {
+	data, err := s.EmployeeRepository.FindByID(ctx, payload.ID, true)
 	if err != nil {
 		if err == constant.RecordNotFound {
 			return &dto.EmployeeDetailResponse{}, res.ErrorBuilder(&res.ErrorConstant.NotFound, err)
 		}
-		return &dto.EmployeeDetailResponse{}, res.ErrorBuilder(&res.ErrorConstant.InternalServerError, err)
-	}
-
-	data, err := s.EmployeeRepository.Edit(ctx, employee, payload)
-	if err != nil {
 		return &dto.EmployeeDetailResponse{}, res.ErrorBuilder(&res.ErrorConstant.InternalServerError, err)
 	}
 
@@ -99,6 +75,66 @@ func (s *service) UpdateById(ctx context.Context, payload *dto.UpdateEmployeeReq
 			ID:   data.Division.ID,
 			Name: data.Division.DivisionName,
 		},
+	}
+
+	return result, nil
+}
+
+func (s *service) UpdateById(ctx context.Context, payload *dto.UpdateEmployeeRequestBody) (*dto.EmployeeDetailResponse, error) {
+	employee, err := s.EmployeeRepository.FindByID(ctx, *payload.ID, false)
+	if err != nil {
+		if err == constant.RecordNotFound {
+			return &dto.EmployeeDetailResponse{}, res.ErrorBuilder(&res.ErrorConstant.NotFound, err)
+		}
+		return &dto.EmployeeDetailResponse{}, res.ErrorBuilder(&res.ErrorConstant.InternalServerError, err)
+	}
+
+	_, err = s.EmployeeRepository.Edit(ctx, &employee, payload)
+	if err != nil {
+		return &dto.EmployeeDetailResponse{}, res.ErrorBuilder(&res.ErrorConstant.InternalServerError, err)
+	}
+
+	result := &dto.EmployeeDetailResponse{
+		EmployeeResponse: dto.EmployeeResponse{
+			ID:       employee.ID,
+			Fullname: employee.Fullname,
+			Email:    employee.Email,
+		},
+		Role: dto.RoleResponse{
+			ID:   employee.Role.ID,
+			Name: employee.Role.RoleName,
+		},
+		Division: dto.DivisionResponse{
+			ID:   employee.Division.ID,
+			Name: employee.Division.DivisionName,
+		},
+	}
+
+	return result, nil
+}
+
+func (s *service) DeleteById(ctx context.Context, payload *dto.ByIDRequest) (*dto.EmployeeWithCUDResponse, error) {
+	employee, err := s.EmployeeRepository.FindByID(ctx, payload.ID, false)
+	if err != nil {
+		if err == constant.RecordNotFound {
+			return &dto.EmployeeWithCUDResponse{}, res.ErrorBuilder(&res.ErrorConstant.NotFound, err)
+		}
+		return &dto.EmployeeWithCUDResponse{}, res.ErrorBuilder(&res.ErrorConstant.InternalServerError, err)
+	}
+	_, err = s.EmployeeRepository.Destroy(ctx, &employee)
+	if err != nil {
+		return &dto.EmployeeWithCUDResponse{}, res.ErrorBuilder(&res.ErrorConstant.InternalServerError, err)
+	}
+
+	result := &dto.EmployeeWithCUDResponse{
+		EmployeeResponse: dto.EmployeeResponse{
+			ID:       employee.ID,
+			Fullname: employee.Fullname,
+			Email:    employee.Email,
+		},
+		CreatedAt: employee.CreatedAt,
+		UpdatedAt: employee.UpdatedAt,
+		DeletedAt: employee.DeletedAt,
 	}
 
 	return result, nil

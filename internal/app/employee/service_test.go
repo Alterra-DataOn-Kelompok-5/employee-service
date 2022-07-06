@@ -121,3 +121,38 @@ func TestServiceUpdateByIdRecordNotFound(t *testing.T) {
 		asserts.Equal(err.Error(), "error code 404")
 	}
 }
+
+func TestServiceDeleteByIdSuccess(t *testing.T) {
+	database.GetConnection()
+	seeder.NewSeeder().DeleteAll()
+	seeder.NewSeeder().SeedAll()
+	var (
+		asserts         = assert.New(t)
+		employeeService = NewService(factory.NewFactory())
+		ctx             = context.Background()
+		id              = uint(1)
+		payload         = dto.ByIDRequest{ID: id}
+	)
+	res, err := employeeService.DeleteById(ctx, &payload)
+	if err != nil {
+		t.Fatal(err)
+	}
+	asserts.NotNil(res.DeletedAt)
+}
+
+func TestServiceDeleteByIdRecordNotFound(t *testing.T) {
+	database.GetConnection()
+	seeder.NewSeeder().DeleteAll()
+	seeder.NewSeeder().SeedAll()
+	var (
+		asserts         = assert.New(t)
+		employeeService = NewService(factory.NewFactory())
+		ctx             = context.Background()
+		id              = uint(10)
+		payload         = dto.ByIDRequest{ID: id}
+	)
+	_, err := employeeService.DeleteById(ctx, &payload)
+	if asserts.Error(err) {
+		asserts.Equal(err.Error(), "error code 404")
+	}
+}
