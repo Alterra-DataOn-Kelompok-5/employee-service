@@ -7,6 +7,7 @@ import (
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/factory"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/repository"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/pkg/constant"
+	pkgdto "github.com/Alterra-DataOn-Kelompok-5/employee-service/pkg/dto"
 	res "github.com/Alterra-DataOn-Kelompok-5/employee-service/pkg/util/response"
 )
 
@@ -15,10 +16,10 @@ type service struct {
 }
 
 type Service interface {
-	Find(ctx context.Context, payload *dto.SearchGetRequest) (*dto.SearchGetResponse[dto.EmployeeResponse], error)
-	FindByID(ctx context.Context, payload *dto.ByIDRequest) (*dto.EmployeeDetailResponse, error)
+	Find(ctx context.Context, payload *pkgdto.SearchGetRequest) (*pkgdto.SearchGetResponse[dto.EmployeeResponse], error)
+	FindByID(ctx context.Context, payload *pkgdto.ByIDRequest) (*dto.EmployeeDetailResponse, error)
 	UpdateById(ctx context.Context, payload *dto.UpdateEmployeeRequestBody) (*dto.EmployeeDetailResponse, error)
-	DeleteById(ctx context.Context, payload *dto.ByIDRequest) (*dto.EmployeeWithCUDResponse, error)
+	DeleteById(ctx context.Context, payload *pkgdto.ByIDRequest) (*dto.EmployeeWithCUDResponse, error)
 }
 
 func NewService(f *factory.Factory) Service {
@@ -27,7 +28,7 @@ func NewService(f *factory.Factory) Service {
 	}
 }
 
-func (s *service) Find(ctx context.Context, payload *dto.SearchGetRequest) (*dto.SearchGetResponse[dto.EmployeeResponse], error) {
+func (s *service) Find(ctx context.Context, payload *pkgdto.SearchGetRequest) (*pkgdto.SearchGetResponse[dto.EmployeeResponse], error) {
 
 	employees, info, err := s.EmployeeRepository.FindAll(ctx, payload, &payload.Pagination)
 	if err != nil {
@@ -45,17 +46,17 @@ func (s *service) Find(ctx context.Context, payload *dto.SearchGetRequest) (*dto
 
 	}
 
-	result := new(dto.SearchGetResponse[dto.EmployeeResponse])
+	result := new(pkgdto.SearchGetResponse[dto.EmployeeResponse])
 	result.Data = data
 	result.PaginationInfo = *info
 
 	return result, nil
 }
 
-func (s *service) FindByID(ctx context.Context, payload *dto.ByIDRequest) (*dto.EmployeeDetailResponse, error) {
+func (s *service) FindByID(ctx context.Context, payload *pkgdto.ByIDRequest) (*dto.EmployeeDetailResponse, error) {
 	data, err := s.EmployeeRepository.FindByID(ctx, payload.ID, true)
 	if err != nil {
-		if err == constant.RecordNotFound {
+		if err == constant.RECORD_NOT_FOUND {
 			return &dto.EmployeeDetailResponse{}, res.ErrorBuilder(&res.ErrorConstant.NotFound, err)
 		}
 		return &dto.EmployeeDetailResponse{}, res.ErrorBuilder(&res.ErrorConstant.InternalServerError, err)
@@ -83,7 +84,7 @@ func (s *service) FindByID(ctx context.Context, payload *dto.ByIDRequest) (*dto.
 func (s *service) UpdateById(ctx context.Context, payload *dto.UpdateEmployeeRequestBody) (*dto.EmployeeDetailResponse, error) {
 	employee, err := s.EmployeeRepository.FindByID(ctx, *payload.ID, false)
 	if err != nil {
-		if err == constant.RecordNotFound {
+		if err == constant.RECORD_NOT_FOUND {
 			return &dto.EmployeeDetailResponse{}, res.ErrorBuilder(&res.ErrorConstant.NotFound, err)
 		}
 		return &dto.EmployeeDetailResponse{}, res.ErrorBuilder(&res.ErrorConstant.InternalServerError, err)
@@ -113,10 +114,10 @@ func (s *service) UpdateById(ctx context.Context, payload *dto.UpdateEmployeeReq
 	return result, nil
 }
 
-func (s *service) DeleteById(ctx context.Context, payload *dto.ByIDRequest) (*dto.EmployeeWithCUDResponse, error) {
+func (s *service) DeleteById(ctx context.Context, payload *pkgdto.ByIDRequest) (*dto.EmployeeWithCUDResponse, error) {
 	employee, err := s.EmployeeRepository.FindByID(ctx, payload.ID, false)
 	if err != nil {
-		if err == constant.RecordNotFound {
+		if err == constant.RECORD_NOT_FOUND {
 			return &dto.EmployeeWithCUDResponse{}, res.ErrorBuilder(&res.ErrorConstant.NotFound, err)
 		}
 		return &dto.EmployeeWithCUDResponse{}, res.ErrorBuilder(&res.ErrorConstant.InternalServerError, err)

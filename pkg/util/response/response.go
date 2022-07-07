@@ -1,7 +1,7 @@
 package response
 
 import (
-	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/dto"
+	"github.com/Alterra-DataOn-Kelompok-5/employee-service/pkg/dto"
 )
 
 type Meta struct {

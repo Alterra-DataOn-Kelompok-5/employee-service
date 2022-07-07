@@ -6,12 +6,13 @@ import (
 
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/dto"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/model"
+	pkgdto "github.com/Alterra-DataOn-Kelompok-5/employee-service/pkg/dto"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/pkg/util"
 	"gorm.io/gorm"
 )
 
 type Employee interface {
-	FindAll(ctx context.Context, payload *dto.SearchGetRequest, p *dto.Pagination) ([]model.Employee, *dto.PaginationInfo, error)
+	FindAll(ctx context.Context, payload *pkgdto.SearchGetRequest, p *pkgdto.Pagination) ([]model.Employee, *pkgdto.PaginationInfo, error)
 	FindByID(ctx context.Context, id uint, usePreload bool) (model.Employee, error)
 	FindByEmail(ctx context.Context, email *string) (*model.Employee, error)
 	ExistByEmail(ctx context.Context, email *string) (bool, error)
@@ -31,7 +32,7 @@ func NewEmployeeRepository(db *gorm.DB) *employee {
 	}
 }
 
-func (r *employee) FindAll(ctx context.Context, payload *dto.SearchGetRequest, pagination *dto.Pagination) ([]model.Employee, *dto.PaginationInfo, error) {
+func (r *employee) FindAll(ctx context.Context, payload *pkgdto.SearchGetRequest, pagination *pkgdto.Pagination) ([]model.Employee, *pkgdto.PaginationInfo, error) {
 	var users []model.Employee
 	var count int64
 
@@ -47,11 +48,11 @@ func (r *employee) FindAll(ctx context.Context, payload *dto.SearchGetRequest, p
 		return nil, nil, err
 	}
 
-	limit, offset := dto.GetLimitOffset(pagination)
+	limit, offset := pkgdto.GetLimitOffset(pagination)
 
 	err := query.Limit(limit).Offset(offset).Find(&users).Error
 
-	return users, dto.CheckInfoPagination(pagination, count), err
+	return users, pkgdto.CheckInfoPagination(pagination, count), err
 }
 
 func (r *employee) FindByID(ctx context.Context, id uint, usePreload bool) (model.Employee, error) {

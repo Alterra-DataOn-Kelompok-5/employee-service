@@ -8,6 +8,7 @@ import (
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/database/seeder"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/dto"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/factory"
+	pkgdto "github.com/Alterra-DataOn-Kelompok-5/employee-service/pkg/dto"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,7 +20,7 @@ func TestServiceFindAllSuccess(t *testing.T) {
 	var (
 		employeeService = NewService(factory.NewFactory())
 		ctx             = context.Background()
-		payload         = dto.SearchGetRequest{}
+		payload         = pkgdto.SearchGetRequest{}
 	)
 	res, err := employeeService.Find(ctx, &payload)
 	if err != nil {
@@ -41,7 +42,7 @@ func TestServiceFindByIdSuccess(t *testing.T) {
 	var (
 		employeeService = NewService(factory.NewFactory())
 		ctx             = context.Background()
-		payload         = dto.ByIDRequest{ID: 1}
+		payload         = pkgdto.ByIDRequest{ID: 1}
 	)
 	res, err := employeeService.FindByID(ctx, &payload)
 	if err != nil {
@@ -57,7 +58,7 @@ func TestServiceFindByIdRecordNotFound(t *testing.T) {
 		asserts         = assert.New(t)
 		employeeService = NewService(factory.NewFactory())
 		ctx             = context.Background()
-		payload         = dto.ByIDRequest{ID: 4}
+		payload         = pkgdto.ByIDRequest{ID: 4}
 	)
 	_, err := employeeService.FindByID(ctx, &payload)
 	if err != nil {
@@ -131,7 +132,7 @@ func TestServiceDeleteByIdSuccess(t *testing.T) {
 		employeeService = NewService(factory.NewFactory())
 		ctx             = context.Background()
 		id              = uint(1)
-		payload         = dto.ByIDRequest{ID: id}
+		payload         = pkgdto.ByIDRequest{ID: id}
 	)
 	res, err := employeeService.DeleteById(ctx, &payload)
 	if err != nil {
@@ -149,7 +150,7 @@ func TestServiceDeleteByIdRecordNotFound(t *testing.T) {
 		employeeService = NewService(factory.NewFactory())
 		ctx             = context.Background()
 		id              = uint(10)
-		payload         = dto.ByIDRequest{ID: id}
+		payload         = pkgdto.ByIDRequest{ID: id}
 	)
 	_, err := employeeService.DeleteById(ctx, &payload)
 	if asserts.Error(err) {

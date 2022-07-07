@@ -6,9 +6,10 @@ import (
 
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/dto"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/factory"
+	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/pkg/util"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/repository"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/pkg/constant"
-	"github.com/Alterra-DataOn-Kelompok-5/employee-service/pkg/util"
+	pkgutil "github.com/Alterra-DataOn-Kelompok-5/employee-service/pkg/util"
 	res "github.com/Alterra-DataOn-Kelompok-5/employee-service/pkg/util/response"
 )
 
@@ -32,26 +33,35 @@ func (s *service) LoginByEmailAndPassword(ctx context.Context, payload *dto.ByEm
 
 	data, err := s.EmployeeRepository.FindByEmail(ctx, &payload.Email)
 	if err != nil {
-		if err == constant.RecordNotFound {
+		if err == constant.RECORD_NOT_FOUND {
 			return result, res.ErrorBuilder(&res.ErrorConstant.NotFound, err)
 		}
 		return result, res.ErrorBuilder(&res.ErrorConstant.InternalServerError, err)
 	}
 
-	if !(util.CompareHashPassword(payload.Password, data.Password)) {
+	if !(pkgutil.CompareHashPassword(payload.Password, data.Password)) {
 		return result, res.ErrorBuilder(
 			&res.ErrorConstant.EmailOrPasswordIncorrect,
 			errors.New(res.ErrorConstant.EmailOrPasswordIncorrect.Response.Meta.Message),
 		)
 	}
-	// TODO: Generate JWT
+
+	claims := util.CreateJWTClaims(data.Email, data.ID, data.RoleID, data.DivisionID)
+	token, err := util.CreateJWTToken(claims)
+	if err != nil {
+		return result, res.ErrorBuilder(
+			&res.ErrorConstant.InternalServerError,
+			errors.New("error when generating token"),
+		)
+	}
+
 	result = &dto.EmployeeWithJWTResponse{
 		EmployeeResponse: dto.EmployeeResponse{
 			ID:       data.ID,
 			Fullname: data.Fullname,
 			Email:    data.Email,
 		},
-		JWT: "put jwt token here",
+		JWT: token,
 	}
 
 	return result, nil
@@ -67,7 +77,7 @@ func (s *service) RegisterByEmailAndPassword(ctx context.Context, payload *dto.R
 		return result, res.ErrorBuilder(&res.ErrorConstant.Duplicate, errors.New("employee already exists"))
 	}
 
-	hashedPassword, err := util.HashPassword(payload.Password)
+	hashedPassword, err := pkgutil.HashPassword(payload.Password)
 	if err != nil {
 		return result, res.ErrorBuilder(&res.ErrorConstant.InternalServerError, err)
 	}
@@ -78,7 +88,14 @@ func (s *service) RegisterByEmailAndPassword(ctx context.Context, payload *dto.R
 		return result, res.ErrorBuilder(&res.ErrorConstant.InternalServerError, err)
 	}
 
-	// TODO: Generate JWT
+	claims := util.CreateJWTClaims(data.Email, data.ID, data.RoleID, data.DivisionID)
+	token, err := util.CreateJWTToken(claims)
+	if err != nil {
+		return result, res.ErrorBuilder(
+			&res.ErrorConstant.InternalServerError,
+			errors.New("error when generating token"),
+		)
+	}
 
 	result = &dto.EmployeeWithJWTResponse{
 		EmployeeResponse: dto.EmployeeResponse{
@@ -86,7 +103,7 @@ func (s *service) RegisterByEmailAndPassword(ctx context.Context, payload *dto.R
 			Fullname: data.Fullname,
 			Email:    data.Email,
 		},
-		JWT: "put jwt token here",
+		JWT: token,
 	}
 
 	return result, nil
