@@ -3,7 +3,7 @@ package response
 import (
 	"net/http"
 
-	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/dto"
+	"github.com/Alterra-DataOn-Kelompok-5/employee-service/pkg/dto"
 	"github.com/labstack/echo/v4"
 )
 

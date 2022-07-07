@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/database"
@@ -18,9 +19,9 @@ func TestServiceLoginByEmailAndPasswordSuccess(t *testing.T) {
 	asserts := assert.New(t)
 	var (
 		authService = NewService(factory.NewFactory())
-		ctx = context.Background()
+		ctx     = context.Background()
 		payload = dto.ByEmailAndPasswordRequest{
-			Email: "vincentlhubbard@superrito.com",
+			Email:    "vincentlhubbard@superrito.com",
 			Password: "123abcABC!",
 		}
 	)
@@ -29,19 +30,19 @@ func TestServiceLoginByEmailAndPasswordSuccess(t *testing.T) {
 		t.Fatal(err)
 	}
 	asserts.Equal(payload.Email, res.Email)
-	asserts.NotEmpty(res.JWT)
+	asserts.Len(strings.Split(res.JWT, "."), 3)
 }
 
 func TestServiceLoginByEmailAndPasswordRecordNotFound(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
-	asserts := assert.New(t)
 	var (
+		asserts     = assert.New(t)
 		authService = NewService(factory.NewFactory())
-		ctx = context.Background()
+		ctx     = context.Background()
 		payload = dto.ByEmailAndPasswordRequest{
-			Email: "azkaframadhan@superrito.com",
+			Email:    "azkaframadhan@superrito.com",
 			Password: "123abcABC!",
 		}
 	)
@@ -58,9 +59,9 @@ func TestServiceLoginByEmailAndPasswordunmatchedEmailAndPassword(t *testing.T) {
 	asserts := assert.New(t)
 	var (
 		authService = NewService(factory.NewFactory())
-		ctx = context.Background()
+		ctx     = context.Background()
 		payload = dto.ByEmailAndPasswordRequest{
-			Email: "vincentlhubbard@superrito.com",
+			Email:    "vincentlhubbard@superrito.com",
 			Password: "1234567890",
 		}
 	)
@@ -77,12 +78,12 @@ func TestServiceRegisterByEmailAndPasswordSuccess(t *testing.T) {
 	asserts := assert.New(t)
 	var (
 		authService = NewService(factory.NewFactory())
-		ctx = context.Background()
+		ctx        = context.Background()
 		divisionID = uint(1)
-		payload = dto.RegisterEmployeeRequestBody{
-			Fullname: "Azka Fadhli Ramadhan",
-			Email: "azkaframadhan@superrito.com",
-			Password: "123abcABC!",
+		payload    = dto.RegisterEmployeeRequestBody{
+			Fullname:   "Azka Fadhli Ramadhan",
+			Email:      "azkaframadhan@superrito.com",
+			Password:   "123abcABC!",
 			DivisionID: &divisionID,
 		}
 	)
@@ -94,7 +95,7 @@ func TestServiceRegisterByEmailAndPasswordSuccess(t *testing.T) {
 	asserts.NotEmpty(res.ID)
 	asserts.Equal(payload.Fullname, res.Fullname)
 	asserts.Equal(payload.Email, res.Email)
-	asserts.NotEmpty(res.JWT)
+	asserts.Len(strings.Split(res.JWT, "."), 3)
 }
 
 func TestServiceRegisterByEmailAndPasswordUserExist(t *testing.T) {
@@ -104,12 +105,12 @@ func TestServiceRegisterByEmailAndPasswordUserExist(t *testing.T) {
 	asserts := assert.New(t)
 	var (
 		authService = NewService(factory.NewFactory())
-		ctx = context.Background()
+		ctx        = context.Background()
 		divisionID = uint(1)
-		payload = dto.RegisterEmployeeRequestBody{
-			Fullname: "Vincent L Hubbard",
-			Email: "vincentlhubbard@superrito.com",
-			Password: "123abcABC!",
+		payload    = dto.RegisterEmployeeRequestBody{
+			Fullname:   "Vincent L Hubbard",
+			Email:      "vincentlhubbard@superrito.com",
+			Password:   "123abcABC!",
 			DivisionID: &divisionID,
 		}
 	)

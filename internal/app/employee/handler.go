@@ -1,10 +1,13 @@
 package employee
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/dto"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/factory"
+	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/pkg/util"
+	pkgdto "github.com/Alterra-DataOn-Kelompok-5/employee-service/pkg/dto"
 	res "github.com/Alterra-DataOn-Kelompok-5/employee-service/pkg/util/response"
 
 	"github.com/labstack/echo/v4"
@@ -21,7 +24,15 @@ func NewHandler(f *factory.Factory) *handler {
 }
 
 func (h *handler) Get(c echo.Context) error {
-	payload := new(dto.SearchGetRequest)
+	authHeader := c.Request().Header.Get("Authorization")
+	jwtClaims, err := util.ParseJWTToken(authHeader)
+	if err != nil {
+		return res.ErrorBuilder(&res.ErrorConstant.Unauthorized, err).Send(c)
+	}
+
+	log.Println(jwtClaims)
+
+	payload := new(pkgdto.SearchGetRequest)
 	if err := c.Bind(payload); err != nil {
 		return res.ErrorBuilder(&res.ErrorConstant.BadRequest, err).Send(c)
 	}
@@ -38,8 +49,16 @@ func (h *handler) Get(c echo.Context) error {
 	return res.CustomSuccessBuilder(http.StatusOK, result.Data, "Get employees success", &result.PaginationInfo).Send(c)
 }
 
-func (h *handler) GetByID(c echo.Context) error {
-	payload := new(dto.ByIDRequest)
+func (h *handler) GetById(c echo.Context) error {
+	authHeader := c.Request().Header.Get("Authorization")
+	jwtClaims, err := util.ParseJWTToken(authHeader)
+	if err != nil {
+		return res.ErrorBuilder(&res.ErrorConstant.Unauthorized, err).Send(c)
+	}
+
+	log.Println(jwtClaims)
+
+	payload := new(pkgdto.ByIDRequest)
 	if err := c.Bind(payload); err != nil {
 		return res.ErrorBuilder(&res.ErrorConstant.BadRequest, err).Send(c)
 	}
@@ -56,6 +75,14 @@ func (h *handler) GetByID(c echo.Context) error {
 }
 
 func (h *handler) UpdateById(c echo.Context) error {
+	authHeader := c.Request().Header.Get("Authorization")
+	jwtClaims, err := util.ParseJWTToken(authHeader)
+	if err != nil {
+		return res.ErrorBuilder(&res.ErrorConstant.Unauthorized, err).Send(c)
+	}
+
+	log.Println(jwtClaims)
+
 	payload := new(dto.UpdateEmployeeRequestBody)
 	if err := c.Bind(payload); err != nil {
 		return res.ErrorBuilder(&res.ErrorConstant.BadRequest, err).Send(c)
@@ -72,7 +99,15 @@ func (h *handler) UpdateById(c echo.Context) error {
 }
 
 func (h *handler) DeleteById(c echo.Context) error {
-	payload := new(dto.ByIDRequest)
+	authHeader := c.Request().Header.Get("Authorization")
+	jwtClaims, err := util.ParseJWTToken(authHeader)
+	if err != nil {
+		return res.ErrorBuilder(&res.ErrorConstant.Unauthorized, err).Send(c)
+	}
+
+	log.Println(jwtClaims)
+
+	payload := new(pkgdto.ByIDRequest)
 	if err := c.Bind(payload); err != nil {
 		return res.ErrorBuilder(&res.ErrorConstant.BadRequest, err).Send(c)
 	}

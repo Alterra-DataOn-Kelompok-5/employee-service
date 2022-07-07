@@ -1,9 +1,9 @@
 package database
 
 import (
-	"os"
 	"sync"
 
+	"github.com/Alterra-DataOn-Kelompok-5/employee-service/pkg/util"
 	"gorm.io/gorm"
 )
 
@@ -12,25 +12,13 @@ var (
 	once   sync.Once
 )
 
-func getenv(key, fallback string) string {
-	var (
-		val     string
-		isExist bool
-	)
-	val, isExist = os.LookupEnv(key)
-	if !isExist {
-		val = fallback
-	}
-	return val
-}
-
 func CreateConnection() {
 	conf := dbConfig{
-		User: getenv("DB_USER", "root"),
-		Pass: getenv("DB_PASS", "1234567890"),
-		Host: getenv("DB_HOST", "localhost"),
-		Port: getenv("DB_PORT", "3306"),
-		Name: getenv("DB_NAME", "employee_svc"),
+		User: util.Getenv("DB_USER", "root"),
+		Pass: util.Getenv("DB_PASS", "1234567890"),
+		Host: util.Getenv("DB_HOST", "localhost"),
+		Port: util.Getenv("DB_PORT", "3306"),
+		Name: util.Getenv("DB_NAME", "employee_svc"),
 	}
 
 	mysql := mysqlConfig{dbConfig: conf}

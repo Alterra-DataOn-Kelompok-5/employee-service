@@ -1,7 +1,9 @@
 package constant
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 var (
-	RecordNotFound = gorm.ErrRecordNotFound
+	RECORD_NOT_FOUND   = gorm.ErrRecordNotFound
 )
