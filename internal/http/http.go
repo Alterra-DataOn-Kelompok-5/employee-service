@@ -2,6 +2,7 @@ package http
 
 import (
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/app/auth"
+	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/app/division"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/app/employee"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/factory"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/pkg/util"
@@ -18,4 +19,6 @@ func NewHttp(e *echo.Echo, f *factory.Factory) {
 	v1 := e.Group("/api/v1")
 	employee.NewHandler(f).Route(v1.Group("/employees"))
 	auth.NewHandler(f).Route(v1.Group("/auth"))
+	division.NewHandler(f).Route(v1.Group("/divisions"))
+	// role.NewHandler(f).Route(v1.Group("/role"))
 }

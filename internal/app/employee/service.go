@@ -29,7 +29,6 @@ func NewService(f *factory.Factory) Service {
 }
 
 func (s *service) Find(ctx context.Context, payload *pkgdto.SearchGetRequest) (*pkgdto.SearchGetResponse[dto.EmployeeResponse], error) {
-
 	employees, info, err := s.EmployeeRepository.FindAll(ctx, payload, &payload.Pagination)
 	if err != nil {
 		return nil, res.ErrorBuilder(&res.ErrorConstant.InternalServerError, err)
@@ -70,11 +69,11 @@ func (s *service) FindByID(ctx context.Context, payload *pkgdto.ByIDRequest) (*d
 		},
 		Role: dto.RoleResponse{
 			ID:   data.Role.ID,
-			Name: data.Role.RoleName,
+			Name: data.Role.Name,
 		},
 		Division: dto.DivisionResponse{
 			ID:   data.Division.ID,
-			Name: data.Division.DivisionName,
+			Name: data.Division.Name,
 		},
 	}
 
@@ -103,11 +102,11 @@ func (s *service) UpdateById(ctx context.Context, payload *dto.UpdateEmployeeReq
 		},
 		Role: dto.RoleResponse{
 			ID:   employee.Role.ID,
-			Name: employee.Role.RoleName,
+			Name: employee.Role.Name,
 		},
 		Division: dto.DivisionResponse{
 			ID:   employee.Division.ID,
-			Name: employee.Division.DivisionName,
+			Name: employee.Division.Name,
 		},
 	}
 

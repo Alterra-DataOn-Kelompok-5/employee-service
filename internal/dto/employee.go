@@ -20,14 +20,6 @@ type (
 		Fullname string `json:"fullname"`
 		Email    string `json:"email"`
 	}
-	RoleResponse struct {
-		ID   uint   `json:"id"`
-		Name string `json:"name"`
-	}
-	DivisionResponse struct {
-		ID   uint   `json:"id"`
-		Name string `json:"name"`
-	}
 	EmployeeWithJWTResponse struct {
 		EmployeeResponse
 		JWT string `json:"jwt"`

@@ -47,6 +47,8 @@ to use this flag:
 	use -s=all to seed all table`,
 	)
 
+	flag.Parse()
+
 	if m == "migrate" {
 		migration.Migrate()
 	} else if m == "rollback" {
