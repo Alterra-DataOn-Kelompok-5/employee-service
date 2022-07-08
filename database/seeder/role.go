@@ -12,7 +12,7 @@ func roleSeeder(db *gorm.DB) {
 	now := time.Now()
 	var roles = []model.Role{
 		{
-			RoleName: "Admin",
+			Name: "Admin",
 			Common: model.Common{
 				ID: 1,
 				CreatedAt: now,
@@ -20,7 +20,7 @@ func roleSeeder(db *gorm.DB) {
 			},
 		},
 		{
-			RoleName: "User",
+			Name: "User",
 			Common: model.Common{
 				ID: 2,
 				CreatedAt: now,

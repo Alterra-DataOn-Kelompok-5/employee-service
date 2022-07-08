@@ -12,7 +12,7 @@ func divisionSeeder(db *gorm.DB) {
 	now := time.Now()
 	var divisions = []model.Division{
 		{
-			DivisionName: "Finance",
+			Name: "Finance",
 			Common: model.Common{
 				ID: 1,
 				CreatedAt: now,
@@ -20,7 +20,7 @@ func divisionSeeder(db *gorm.DB) {
 			},
 		},
 		{
-			DivisionName: "IT",
+			Name: "IT",
 			Common: model.Common{
 				ID: 2,
 				CreatedAt: now,
