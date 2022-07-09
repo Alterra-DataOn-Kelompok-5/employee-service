@@ -10,6 +10,7 @@ import (
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/database/seeder"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/factory"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/mocks"
+	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/pkg/enum"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/pkg/util"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/repository"
 	"github.com/labstack/echo/v4"
@@ -17,20 +18,21 @@ import (
 )
 
 var (
-	claims          = util.CreateJWTClaims(testEmail, testEmployeeID, testRoleID, testDivisionID)
+	adminClaims     = util.CreateJWTClaims(testEmail, testEmployeeID, testAdminRoleID, testDivisionID)
+	userClaims      = util.CreateJWTClaims(testEmail, uint(2), uint(enum.User), testDivisionID)
 	db              = database.GetConnection()
 	echoMock        = mocks.EchoMock{E: echo.New()}
 	employeeHandler = NewHandler(&f)
 	f               = factory.Factory{EmployeeRepository: repository.NewEmployeeRepository(db)}
-	testDivisionID  = uint(1)
+	testAdminRoleID = uint(enum.Admin)
+	testDivisionID  = uint(enum.Finance)
 	testEmail       = "vincentlhubbard@superrito.com"
-	testRoleID      = uint(1)
 	testEmployeeID  = uint(1)
 )
 
-func TestHandlerGetInvalidPayload(t *testing.T) {
+func TestEmployeeHandlerGetInvalidPayload(t *testing.T) {
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -49,7 +51,7 @@ func TestHandlerGetInvalidPayload(t *testing.T) {
 	}
 }
 
-func TestHandlerGetUnauthorized(t *testing.T) {
+func TestEmployeeHandlerGetUnauthorized(t *testing.T) {
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
 	c.SetPath("/api/v1/employees")
 
@@ -62,9 +64,9 @@ func TestHandlerGetUnauthorized(t *testing.T) {
 	}
 }
 
-func TestHandlerGetSuccess(t *testing.T) {
+func TestEmployeeHandlerGetSuccess(t *testing.T) {
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -86,11 +88,11 @@ func TestHandlerGetSuccess(t *testing.T) {
 	}
 }
 
-func TestHandlerGetByIdInvalidPayload(t *testing.T) {
+func TestEmployeeHandlerGetByIdInvalidPayload(t *testing.T) {
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
 	employeeID := "a"
 
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -110,19 +112,18 @@ func TestHandlerGetByIdInvalidPayload(t *testing.T) {
 	}
 }
 
-func TestHandlerGetByIdNotFound(t *testing.T) {
+func TestEmployeeHandlerGetByIdNotFound(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
-	employeeID := strconv.Itoa(int(testEmployeeID))
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	c.SetPath("/api/v1/employees")
 	c.SetParamNames("id")
-	c.SetParamValues(employeeID)
+	c.SetParamValues(strconv.Itoa(int(testEmployeeID)))
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	// testing
@@ -135,15 +136,14 @@ func TestHandlerGetByIdNotFound(t *testing.T) {
 	}
 }
 
-func TestHandlerGetByIdUnauthorized(t *testing.T) {
+func TestEmployeeHandlerGetByIdUnauthorized(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
-	employeeID := strconv.Itoa(int(testEmployeeID))
 
 	c.SetPath("/api/v1/employees")
 	c.SetParamNames("id")
-	c.SetParamValues(employeeID)
+	c.SetParamValues(strconv.Itoa(int(testEmployeeID)))
 
 	// testing
 	asserts := assert.New(t)
@@ -154,20 +154,19 @@ func TestHandlerGetByIdUnauthorized(t *testing.T) {
 	}
 }
 
-func TestHandlerGetByIdSuccess(t *testing.T) {
+func TestEmployeeHandlerGetByIdSuccess(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
 
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
-	employeeID := strconv.Itoa(int(testEmployeeID))
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	c.SetPath("/api/v1/employees")
 	c.SetParamNames("id")
-	c.SetParamValues(employeeID)
+	c.SetParamValues(strconv.Itoa(int(testEmployeeID)))
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	// testing
@@ -184,10 +183,10 @@ func TestHandlerGetByIdSuccess(t *testing.T) {
 	}
 }
 
-func TestHandlerUpdateByIdInvalidPayload(t *testing.T) {
+func TestEmployeeHandlerUpdateByIdInvalidPayload(t *testing.T) {
 	c, rec := echoMock.RequestMock(http.MethodPut, "/", nil)
 	employeeID := "a"
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -207,19 +206,18 @@ func TestHandlerUpdateByIdInvalidPayload(t *testing.T) {
 	}
 }
 
-func TestHandlerUpdateByIdNotFound(t *testing.T) {
+func TestEmployeeHandlerUpdateByIdNotFound(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 
 	c, rec := echoMock.RequestMock(http.MethodPut, "/", nil)
-	employeeID := strconv.Itoa(int(testEmployeeID))
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	c.SetPath("/employees")
 	c.SetParamNames("id")
-	c.SetParamValues(employeeID)
+	c.SetParamValues(strconv.Itoa(int(testEmployeeID)))
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	// testing
@@ -232,15 +230,20 @@ func TestHandlerUpdateByIdNotFound(t *testing.T) {
 	}
 }
 
-func TestHandlerUpdateByIdUnauthorized(t *testing.T) {
+func TestEmployeeHandlerUpdateByIdUnauthorized(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
+	seeder.NewSeeder().SeedAll()
 
 	c, rec := echoMock.RequestMock(http.MethodPut, "/", nil)
-	employeeID := strconv.Itoa(int(testEmployeeID))
+	token, err := util.CreateJWTToken(userClaims)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	c.SetPath("/api/v1/employees")
 	c.SetParamNames("id")
-	c.SetParamValues(employeeID)
+	c.SetParamValues(strconv.Itoa(int(3)))
+	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	// testing
 	asserts := assert.New(t)
@@ -251,20 +254,19 @@ func TestHandlerUpdateByIdUnauthorized(t *testing.T) {
 	}
 }
 
-func TestHandlerUpdateByIdSuccess(t *testing.T) {
+func TestEmployeeHandlerUpdateByIdSuccess(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
 
 	c, rec := echoMock.RequestMock(http.MethodPut, "/", nil)
-	employeeID := strconv.Itoa(int(testEmployeeID))
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(userClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	c.SetPath("/employees")
 	c.SetParamNames("id")
-	c.SetParamValues(employeeID)
+	c.SetParamValues(strconv.Itoa(int(userClaims.UserID)))
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	// testing
@@ -281,10 +283,10 @@ func TestHandlerUpdateByIdSuccess(t *testing.T) {
 	}
 }
 
-func TestHandlerDeleteByIdInvalidPayload(t *testing.T) {
+func TestEmployeeHandlerDeleteByIdInvalidPayload(t *testing.T) {
 	c, rec := echoMock.RequestMock(http.MethodDelete, "/", nil)
 	employeeID := "a"
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -304,19 +306,18 @@ func TestHandlerDeleteByIdInvalidPayload(t *testing.T) {
 	}
 }
 
-func TestHandlerDeleteByIdNotFound(t *testing.T) {
+func TestEmployeeHandlerDeleteByIdNotFound(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 
 	c, rec := echoMock.RequestMock(http.MethodDelete, "/", nil)
-	employeeID := strconv.Itoa(int(testEmployeeID))
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	c.SetPath("/employees")
 	c.SetParamNames("id")
-	c.SetParamValues(employeeID)
+	c.SetParamValues(strconv.Itoa(int(testEmployeeID)))
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	// testing
@@ -329,15 +330,14 @@ func TestHandlerDeleteByIdNotFound(t *testing.T) {
 	}
 }
 
-func TestHandlerDeleteByIdUnauthorized(t *testing.T) {
+func TestEmployeeHandlerDeleteByIdUnauthorized(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 
 	c, rec := echoMock.RequestMock(http.MethodDelete, "/", nil)
-	employeeID := strconv.Itoa(int(testEmployeeID))
 
 	c.SetPath("/api/v1/employees")
 	c.SetParamNames("id")
-	c.SetParamValues(employeeID)
+	c.SetParamValues(strconv.Itoa(int(testEmployeeID)))
 
 	// testing
 	asserts := assert.New(t)
@@ -348,20 +348,19 @@ func TestHandlerDeleteByIdUnauthorized(t *testing.T) {
 	}
 }
 
-func TestHandlerDeleteByIdSuccess(t *testing.T) {
+func TestEmployeeHandlerDeleteByIdSuccess(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
 
 	c, rec := echoMock.RequestMock(http.MethodDelete, "/", nil)
-	employeeID := strconv.Itoa(int(testEmployeeID))
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	c.SetPath("/employees")
 	c.SetParamNames("id")
-	c.SetParamValues(employeeID)
+	c.SetParamValues(strconv.Itoa(int(testEmployeeID)))
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	// testing

@@ -99,7 +99,7 @@ var ErrorConstant errorConstant = errorConstant{
 		Response: errorResponse{
 			Meta: Meta{
 				Success: false,
-				Message: "Unauthorized, please login",
+				Message: "Unauthorized, please login or use different role",
 			},
 			Error: E_UNAUTHORIZED,
 		},

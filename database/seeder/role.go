@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/model"
+	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/pkg/enum"
 	"gorm.io/gorm"
 )
 
@@ -12,7 +13,7 @@ func roleSeeder(db *gorm.DB) {
 	now := time.Now()
 	var roles = []model.Role{
 		{
-			Name: "Admin",
+			Name: enum.Role.String(1),
 			Common: model.Common{
 				ID: 1,
 				CreatedAt: now,
@@ -20,7 +21,7 @@ func roleSeeder(db *gorm.DB) {
 			},
 		},
 		{
-			Name: "User",
+			Name: enum.Role.String(2),
 			Common: model.Common{
 				ID: 2,
 				CreatedAt: now,

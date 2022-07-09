@@ -8,21 +8,34 @@ import (
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/database/seeder"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/dto"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/factory"
+	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/pkg/enum"
 	pkgdto "github.com/Alterra-DataOn-Kelompok-5/employee-service/pkg/dto"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestServiceFindAllSuccess(t *testing.T) {
+var (
+	testID                    = uint(1)
+	testFullname              = "Vincent Luis Hubbard"
+	ctx                       = context.Background()
+	testEmployeeService       = NewService(factory.NewFactory())
+	testUpdateEmployeePayload = dto.UpdateEmployeeRequestBody{
+		ID:         &testID,
+		Fullname:   &testFullname,
+		Email:      &testEmail,
+		DivisionID: &testDivisionID,
+		RoleID:     &testAdminRoleID,
+	}
+	testFindAllPayload  = pkgdto.SearchGetRequest{}
+	testFindByIdPayload = pkgdto.ByIDRequest{ID: 1}
+)
+
+func TestEmployeeServiceFindAllSuccess(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
+
 	asserts := assert.New(t)
-	var (
-		employeeService = NewService(factory.NewFactory())
-		ctx             = context.Background()
-		payload         = pkgdto.SearchGetRequest{}
-	)
-	res, err := employeeService.Find(ctx, &payload)
+	res, err := testEmployeeService.Find(ctx, &testFindAllPayload)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -34,125 +47,76 @@ func TestServiceFindAllSuccess(t *testing.T) {
 	}
 }
 
-func TestServiceFindByIdSuccess(t *testing.T) {
+func TestEmployeeServiceFindByIdSuccess(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
+
 	asserts := assert.New(t)
-	var (
-		employeeService = NewService(factory.NewFactory())
-		ctx             = context.Background()
-		payload         = pkgdto.ByIDRequest{ID: 1}
-	)
-	res, err := employeeService.FindByID(ctx, &payload)
+	res, err := testEmployeeService.FindByID(ctx, &testFindByIdPayload)
 	if err != nil {
 		t.Fatal(err)
 	}
 	asserts.Equal(uint(1), res.ID)
 }
 
-func TestServiceFindByIdRecordNotFound(t *testing.T) {
+func TestEmployeeServiceFindByIdRecordNotFound(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
-	var (
-		asserts         = assert.New(t)
-		employeeService = NewService(factory.NewFactory())
-		ctx             = context.Background()
-		payload         = pkgdto.ByIDRequest{ID: 4}
-	)
-	_, err := employeeService.FindByID(ctx, &payload)
+
+	asserts := assert.New(t)
+	_, err := testEmployeeService.FindByID(ctx, &testFindByIdPayload)
 	if err != nil {
 		asserts.Equal(err.Error(), "error code 404")
 	}
 }
 
-func TestServiceUpdataByIdSuccess(t *testing.T) {
+func TestEmployeeServiceUpdateByIdSuccess(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
-	var (
-		asserts         = assert.New(t)
-		employeeService = NewService(factory.NewFactory())
-		ctx             = context.Background()
-		id              = uint(1)
-		fullname        = "Vincent Luis Hubbard"
-		email           = "vincentluishubbars@superrito.com"
-		divisionID      = uint(2)
-		roleID          = uint(2)
-		payload         = dto.UpdateEmployeeRequestBody{
-			ID:         &id,
-			Fullname:   &fullname,
-			Email:      &email,
-			DivisionID: &divisionID,
-			RoleID:     &roleID,
-		}
-	)
-	res, err := employeeService.UpdateById(ctx, &payload)
+
+	asserts := assert.New(t)
+	res, err := testEmployeeService.UpdateById(ctx, &testUpdateEmployeePayload)
 	if err != nil {
 		t.Fatal(err)
 	}
-	asserts.Equal(fullname, res.Fullname)
-	asserts.Equal(email, res.Email)
-	asserts.Equal("IT", res.Division.Name)
-	asserts.Equal("User", res.Role.Name)
+	asserts.Equal(testFullname, res.Fullname)
+	asserts.Equal(testEmail, res.Email)
+	asserts.Equal(enum.Division(testDivisionID).String(), res.Division.Name)
+	asserts.Equal(enum.Role(testAdminRoleID).String(), res.Role.Name)
 }
 
-func TestServiceUpdateByIdRecordNotFound(t *testing.T) {
+func TestEmployeeServiceUpdateByIdRecordNotFound(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
-	var (
-		asserts         = assert.New(t)
-		employeeService = NewService(factory.NewFactory())
-		ctx             = context.Background()
-		id              = uint(1)
-		fullname        = "Vincent Luis Hubbard"
-		email           = "vincentluishubbars@superrito.com"
-		divisionID      = uint(2)
-		roleID          = uint(2)
-		payload         = dto.UpdateEmployeeRequestBody{
-			ID:         &id,
-			Fullname:   &fullname,
-			Email:      &email,
-			DivisionID: &divisionID,
-			RoleID:     &roleID,
-		}
-	)
-	_, err := employeeService.UpdateById(ctx, &payload)
+
+	asserts := assert.New(t)
+	_, err := testEmployeeService.UpdateById(ctx, &testUpdateEmployeePayload)
 	if err != nil {
 		asserts.Equal(err.Error(), "error code 404")
 	}
 }
 
-func TestServiceDeleteByIdSuccess(t *testing.T) {
+func TestEmployeeServiceDeleteByIdSuccess(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
-	var (
-		asserts         = assert.New(t)
-		employeeService = NewService(factory.NewFactory())
-		ctx             = context.Background()
-		id              = uint(1)
-		payload         = pkgdto.ByIDRequest{ID: id}
-	)
-	res, err := employeeService.DeleteById(ctx, &payload)
+
+	asserts := assert.New(t)
+	res, err := testEmployeeService.DeleteById(ctx, &testFindByIdPayload)
 	if err != nil {
 		t.Fatal(err)
 	}
 	asserts.NotNil(res.DeletedAt)
 }
 
-func TestServiceDeleteByIdRecordNotFound(t *testing.T) {
+func TestEmployeeServiceDeleteByIdRecordNotFound(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
-	seeder.NewSeeder().SeedAll()
-	var (
-		asserts         = assert.New(t)
-		employeeService = NewService(factory.NewFactory())
-		ctx             = context.Background()
-		id              = uint(10)
-		payload         = pkgdto.ByIDRequest{ID: id}
-	)
-	_, err := employeeService.DeleteById(ctx, &payload)
+
+	asserts := assert.New(t)
+	_, err := testEmployeeService.DeleteById(ctx, &testFindByIdPayload)
 	if asserts.Error(err) {
 		asserts.Equal(err.Error(), "error code 404")
 	}

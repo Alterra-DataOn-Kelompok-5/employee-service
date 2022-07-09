@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestServiceLoginByEmailAndPasswordSuccess(t *testing.T) {
+func TestAuthServiceLoginByEmailAndPasswordSuccess(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
@@ -33,7 +33,7 @@ func TestServiceLoginByEmailAndPasswordSuccess(t *testing.T) {
 	asserts.Len(strings.Split(res.JWT, "."), 3)
 }
 
-func TestServiceLoginByEmailAndPasswordRecordNotFound(t *testing.T) {
+func TestAuthServiceLoginByEmailAndPasswordRecordNotFound(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
@@ -52,7 +52,7 @@ func TestServiceLoginByEmailAndPasswordRecordNotFound(t *testing.T) {
 	}
 }
 
-func TestServiceLoginByEmailAndPasswordunmatchedEmailAndPassword(t *testing.T) {
+func TestAuthServiceLoginByEmailAndPasswordunmatchedEmailAndPassword(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
@@ -71,7 +71,7 @@ func TestServiceLoginByEmailAndPasswordunmatchedEmailAndPassword(t *testing.T) {
 	}
 }
 
-func TestServiceRegisterByEmailAndPasswordSuccess(t *testing.T) {
+func TestAuthServiceRegisterByEmailAndPasswordSuccess(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
@@ -98,7 +98,7 @@ func TestServiceRegisterByEmailAndPasswordSuccess(t *testing.T) {
 	asserts.Len(strings.Split(res.JWT, "."), 3)
 }
 
-func TestServiceRegisterByEmailAndPasswordUserExist(t *testing.T) {
+func TestAuthServiceRegisterByEmailAndPasswordUserExist(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()

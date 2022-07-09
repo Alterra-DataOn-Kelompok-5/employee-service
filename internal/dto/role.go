@@ -11,7 +11,7 @@ type (
 		Name *string `json:"name" validate:"required"`
 	}
 	UpdateRoleRequestBody struct {
-		ID       *uint   `param:"id" validate:"required"`
+		ID   *uint   `param:"id" validate:"required"`
 		Name *string `json:"name" validate:"required"`
 	}
 	RoleResponse struct {
