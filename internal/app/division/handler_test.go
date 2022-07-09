@@ -13,6 +13,7 @@ import (
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/dto"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/factory"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/mocks"
+	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/pkg/enum"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/pkg/util"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/repository"
 	"github.com/labstack/echo/v4"
@@ -20,23 +21,25 @@ import (
 )
 
 var (
-	claims            = util.CreateJWTClaims(testEmail, testEmployeeID, testRoleID, testDivisionID)
+	adminClaims       = util.CreateJWTClaims(testEmail, testEmployeeID, testAdminRoleID, testDivisionID)
 	db                = database.GetConnection()
-	echoMock          = mocks.EchoMock{E: echo.New()}
 	divisionHandler   = NewHandler(&f)
+	echoMock          = mocks.EchoMock{E: echo.New()}
 	f                 = factory.Factory{DivisionRepository: repository.NewDivisionRepository(db)}
-	testDivisionID    = uint(1)
+	testAdminRoleID   = uint(enum.Admin)
+	testCreatePayload = dto.CreateDivisionRequestBody{Name: &testDivisionName}
+	testDivisionID    = uint(enum.Finance)
+	testDivisionName  = enum.Division(testDivisionID).String()
 	testEmail         = "vincentlhubbard@superrito.com"
 	testEmployeeID    = uint(1)
-	testRoleID        = uint(1)
-	testDivisionName  = "Finance Dept."
 	testUpdatePayload = dto.UpdateDivisionRequestBody{ID: &testDivisionID, Name: &testDivisionName}
-	testCreatePayload = dto.CreateDivisionRequestBody{Name: &testDivisionName}
+	testUserRoleID    = uint(enum.User)
+	userClaims        = util.CreateJWTClaims(testEmail, testEmployeeID, testUserRoleID, testDivisionID)
 )
 
-func TestHandlerGetInvalidPayload(t *testing.T) {
+func TestDivisionHandlerGetInvalidPayload(t *testing.T) {
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,7 +57,7 @@ func TestHandlerGetInvalidPayload(t *testing.T) {
 		asserts.Contains(body, "Bad Request")
 	}
 }
-func TestHandlerGetUnauthorized(t *testing.T) {
+func TestDivisionHandlerGetUnauthorized(t *testing.T) {
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
 	c.SetPath("/api/v1/divisions")
 
@@ -67,9 +70,9 @@ func TestHandlerGetUnauthorized(t *testing.T) {
 	}
 }
 
-func TestHandlerGetSuccess(t *testing.T) {
+func TestDivisionHandlerGetSuccess(t *testing.T) {
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,11 +93,11 @@ func TestHandlerGetSuccess(t *testing.T) {
 	}
 }
 
-func TestHandlerGetByIdInvalidPayload(t *testing.T) {
+func TestDivisionHandlerGetByIdInvalidPayload(t *testing.T) {
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
 	divisionID := "a"
 
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -114,12 +117,12 @@ func TestHandlerGetByIdInvalidPayload(t *testing.T) {
 	}
 }
 
-func TestHandlerGetByIdNotFound(t *testing.T) {
+func TestDivisionHandlerGetByIdNotFound(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
 	divisionID := strconv.Itoa(int(testDivisionID))
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -139,7 +142,7 @@ func TestHandlerGetByIdNotFound(t *testing.T) {
 	}
 }
 
-func TestHandlerGetByIdUnauthorized(t *testing.T) {
+func TestDivisionHandlerGetByIdUnauthorized(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
@@ -158,13 +161,13 @@ func TestHandlerGetByIdUnauthorized(t *testing.T) {
 	}
 }
 
-func TestHandlerGetByIdSuccess(t *testing.T) {
+func TestDivisionHandlerGetByIdSuccess(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
 
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
 	divisionID := strconv.Itoa(int(testDivisionID))
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -185,10 +188,10 @@ func TestHandlerGetByIdSuccess(t *testing.T) {
 	}
 }
 
-func TestHandlerUpdateByIdInvalidPayload(t *testing.T) {
+func TestDivisionHandlerUpdateByIdInvalidPayload(t *testing.T) {
 	c, rec := echoMock.RequestMock(http.MethodPut, "/", nil)
 	divisionID := "a"
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -208,7 +211,7 @@ func TestHandlerUpdateByIdInvalidPayload(t *testing.T) {
 	}
 }
 
-func TestHandlerUpdateByIdNotFound(t *testing.T) {
+func TestDivisionHandlerUpdateByIdNotFound(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 
 	payload, err := json.Marshal(testUpdatePayload)
@@ -217,7 +220,7 @@ func TestHandlerUpdateByIdNotFound(t *testing.T) {
 	}
 	c, rec := echoMock.RequestMock(http.MethodPut, "/", bytes.NewBuffer(payload))
 	divisionID := strconv.Itoa(int(testDivisionID))
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -237,7 +240,7 @@ func TestHandlerUpdateByIdNotFound(t *testing.T) {
 		asserts.Contains(body, "Data not found")
 	}
 }
-func TestHandlerUpdateByIdUnauthorized(t *testing.T) {
+func TestDivisionHandlerUpdateByIdUnauthorized(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 
 	c, rec := echoMock.RequestMock(http.MethodPut, "/", nil)
@@ -246,6 +249,12 @@ func TestHandlerUpdateByIdUnauthorized(t *testing.T) {
 	c.SetPath("/api/v1/divisions")
 	c.SetParamNames("id")
 	c.SetParamValues(divisionID)
+
+	token, err := util.CreateJWTToken(userClaims)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	// testing
 	asserts := assert.New(t)
@@ -256,7 +265,7 @@ func TestHandlerUpdateByIdUnauthorized(t *testing.T) {
 	}
 }
 
-func TestHandlerUpdateByIdSuccess(t *testing.T) {
+func TestDivisionHandlerUpdateByIdSuccess(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
 
@@ -266,7 +275,7 @@ func TestHandlerUpdateByIdSuccess(t *testing.T) {
 	}
 	c, rec := echoMock.RequestMock(http.MethodPut, "/", bytes.NewBuffer(payload))
 	divisionID := strconv.Itoa(int(testDivisionID))
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -288,10 +297,10 @@ func TestHandlerUpdateByIdSuccess(t *testing.T) {
 	}
 }
 
-func TestHandlerDeleteByIdInvalidPayload(t *testing.T) {
+func TestDivisionHandlerDeleteByIdInvalidPayload(t *testing.T) {
 	c, rec := echoMock.RequestMock(http.MethodDelete, "/", nil)
 	divisionID := "a"
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -311,12 +320,12 @@ func TestHandlerDeleteByIdInvalidPayload(t *testing.T) {
 	}
 }
 
-func TestHandlerDeleteByIdNotFound(t *testing.T) {
+func TestDivisionHandlerDeleteByIdNotFound(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 
 	c, rec := echoMock.RequestMock(http.MethodDelete, "/", nil)
 	divisionID := strconv.Itoa(int(testDivisionID))
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -336,7 +345,7 @@ func TestHandlerDeleteByIdNotFound(t *testing.T) {
 	}
 }
 
-func TestHandlerDeleteByIdUnauthorized(t *testing.T) {
+func TestDivisionHandlerDeleteByIdUnauthorized(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 
 	c, rec := echoMock.RequestMock(http.MethodDelete, "/", nil)
@@ -345,6 +354,12 @@ func TestHandlerDeleteByIdUnauthorized(t *testing.T) {
 	c.SetPath("/api/v1/divisions")
 	c.SetParamNames("id")
 	c.SetParamValues(divisionID)
+
+	token, err := util.CreateJWTToken(userClaims)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	// testing
 	asserts := assert.New(t)
@@ -355,13 +370,13 @@ func TestHandlerDeleteByIdUnauthorized(t *testing.T) {
 	}
 }
 
-func TestHandlerDeleteByIdSuccess(t *testing.T){
+func TestDivisionHandlerDeleteByIdSuccess(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
 
 	c, rec := echoMock.RequestMock(http.MethodDelete, "/", nil)
 	divisionID := strconv.Itoa(int(testDivisionID))
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -383,8 +398,8 @@ func TestHandlerDeleteByIdSuccess(t *testing.T){
 	}
 }
 
-func TestHandlerCreateInvalidPayload(t *testing.T) {
-	token, err := util.CreateJWTToken(claims)
+func TestDivisionHandlerCreateInvalidPayload(t *testing.T) {
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -409,15 +424,15 @@ func TestHandlerCreateInvalidPayload(t *testing.T) {
 	}
 }
 
-func TestHandlerCreateDivisionAlreadyExist(t *testing.T) {
+func TestDivisionHandlerCreateDivisionAlreadyExist(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
 
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
-	name := "Finance"
+	name := enum.Division(testDivisionID).String()
 	payload, err := json.Marshal(dto.CreateDivisionRequestBody{Name: &name})
 	if err != nil {
 		t.Fatal(err)
@@ -439,7 +454,7 @@ func TestHandlerCreateDivisionAlreadyExist(t *testing.T) {
 	}
 }
 
-func TestHandlerCreateUnauthorized(t *testing.T) {
+func TestDivisionHandlerCreateUnauthorized(t *testing.T) {
 	payload, err := json.Marshal(testCreatePayload)
 	if err != nil {
 		t.Fatal(err)
@@ -449,6 +464,12 @@ func TestHandlerCreateUnauthorized(t *testing.T) {
 
 	c.SetPath("/api/v1/divisions")
 	c.Request().Header.Set("Content-Type", "application/json")
+
+	token, err := util.CreateJWTToken(userClaims)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	// testing
 	asserts := assert.New(t)
@@ -460,11 +481,10 @@ func TestHandlerCreateUnauthorized(t *testing.T) {
 	}
 }
 
-func TestHandlerCreateSuccess(t *testing.T){
+func TestDivisionHandlerCreateSuccess(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
-	seeder.NewSeeder().SeedAll()
 
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}

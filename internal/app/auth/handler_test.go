@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHandlerLoginByEmailAndPasswordInvalidPayload(t *testing.T) {
+func TestAuthHandlerLoginByEmailAndPasswordInvalidPayload(t *testing.T) {
 	// setup database
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
@@ -43,7 +43,7 @@ func TestHandlerLoginByEmailAndPasswordInvalidPayload(t *testing.T) {
 	}
 }
 
-func TestHandlerLoginByEmailAndPasswordUnmatchedEmailAndPassword(t *testing.T) {
+func TestAuthHandlerLoginByEmailAndPasswordUnmatchedEmailAndPassword(t *testing.T) {
 	// setup database
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
@@ -79,7 +79,7 @@ func TestHandlerLoginByEmailAndPasswordUnmatchedEmailAndPassword(t *testing.T) {
 	}
 }
 
-func TestHandlerLoginByEmailAndPasswordSuccess(t *testing.T) {
+func TestAuthHandlerLoginByEmailAndPasswordSuccess(t *testing.T) {
 	// setup database
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
@@ -118,7 +118,7 @@ func TestHandlerLoginByEmailAndPasswordSuccess(t *testing.T) {
 	}
 }
 
-func TestHandlerRegisterByEmailAndPasswordUserAlreadyExist(t *testing.T) {
+func TestAuthHandlerRegisterByEmailAndPasswordUserAlreadyExist(t *testing.T) {
 	// setup database
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
@@ -162,7 +162,7 @@ func TestHandlerRegisterByEmailAndPasswordUserAlreadyExist(t *testing.T) {
 	}
 }
 
-func TestHandlerRegisterByEmailAndPasswordInvalidPayload(t *testing.T) {
+func TestAuthHandlerRegisterByEmailAndPasswordInvalidPayload(t *testing.T) {
 	// setup database
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
@@ -204,7 +204,7 @@ func TestHandlerRegisterByEmailAndPasswordInvalidPayload(t *testing.T) {
 	}
 }
 
-func TestHandlerRegisterByEmailAndPasswordSuccess(t *testing.T) {
+func TestAuthHandlerRegisterByEmailAndPasswordSuccess(t *testing.T) {
 	// setup database
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()

@@ -74,7 +74,7 @@ func (r *division) Edit(ctx context.Context, oldDivision *model.Division, update
 	if updateData.Name != nil {
 		oldDivision.Name = *updateData.Name
 	}
-	
+
 	if err := r.Db.WithContext(ctx).Save(oldDivision).Find(oldDivision).Error; err != nil {
 		return nil, err
 	}

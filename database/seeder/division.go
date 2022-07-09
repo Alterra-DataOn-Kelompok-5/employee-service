@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/model"
+	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/pkg/enum"
 	"gorm.io/gorm"
 )
 
@@ -12,7 +13,7 @@ func divisionSeeder(db *gorm.DB) {
 	now := time.Now()
 	var divisions = []model.Division{
 		{
-			Name: "Finance",
+			Name: enum.Division.String(1),
 			Common: model.Common{
 				ID: 1,
 				CreatedAt: now,
@@ -20,9 +21,17 @@ func divisionSeeder(db *gorm.DB) {
 			},
 		},
 		{
-			Name: "IT",
+			Name: enum.Division.String(2),
 			Common: model.Common{
 				ID: 2,
+				CreatedAt: now,
+				UpdatedAt: now,
+			},
+		},
+		{
+			Name: enum.Division.String(3),
+			Common: model.Common{
+				ID: 3,
 				CreatedAt: now,
 				UpdatedAt: now,
 			},

@@ -13,6 +13,7 @@ import (
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/dto"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/factory"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/mocks"
+	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/pkg/enum"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/pkg/util"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/repository"
 	"github.com/labstack/echo/v4"
@@ -20,23 +21,25 @@ import (
 )
 
 var (
-	claims            = util.CreateJWTClaims(testEmail, testEmployeeID, testRoleID, testDivisionID)
+	adminClaims       = util.CreateJWTClaims(testEmail, testEmployeeID, testAdminRoleID, testDivisionID)
 	db                = database.GetConnection()
 	echoMock          = mocks.EchoMock{E: echo.New()}
-	roleHandler       = NewHandler(&f)
 	f                 = factory.Factory{RoleRepository: repository.NewRoleRepository(db)}
-	testDivisionID    = uint(1)
+	roleHandler       = NewHandler(&f)
+	testAdminRoleID   = uint(enum.Admin)
+	testCreatePayload = dto.CreateRoleRequestBody{Name: &testRoleName}
+	testDivisionID    = uint(enum.Finance)
 	testEmail         = "vincentlhubbard@superrito.com"
 	testEmployeeID    = uint(1)
-	testRoleID        = uint(1)
 	testRoleName      = "Admin"
-	testUpdatePayload = dto.UpdateRoleRequestBody{ID: &testRoleID, Name: &testRoleName}
-	testCreatePayload = dto.CreateRoleRequestBody{Name: &testRoleName}
+	testUpdatePayload = dto.UpdateRoleRequestBody{ID: &testAdminRoleID, Name: &testRoleName}
+	testUserRoleID    = uint(enum.User)
+	userClaims        = util.CreateJWTClaims(testEmail, testEmployeeID, testUserRoleID, testDivisionID)
 )
 
-func TestHandlerGetInvalidPayload(t *testing.T) {
+func TestRoleHandlerGetInvalidPayload(t *testing.T) {
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,9 +57,15 @@ func TestHandlerGetInvalidPayload(t *testing.T) {
 		asserts.Contains(body, "Bad Request")
 	}
 }
-func TestHandlerGetUnauthorized(t *testing.T) {
+
+func TestRoleHandlerGetUnauthorized(t *testing.T) {
+	token, err := util.CreateJWTToken(userClaims)
+	if err != nil {
+		t.Fatal(err)
+	}
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
 	c.SetPath("/api/v1/roles")
+	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	// testing
 	asserts := assert.New(t)
@@ -67,9 +76,9 @@ func TestHandlerGetUnauthorized(t *testing.T) {
 	}
 }
 
-func TestHandlerGetSuccess(t *testing.T) {
+func TestRoleHandlerGetSuccess(t *testing.T) {
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,11 +99,11 @@ func TestHandlerGetSuccess(t *testing.T) {
 	}
 }
 
-func TestHandlerGetByIdInvalidPayload(t *testing.T) {
+func TestRoleHandlerGetByIdInvalidPayload(t *testing.T) {
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
 	roleID := "a"
 
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -114,12 +123,12 @@ func TestHandlerGetByIdInvalidPayload(t *testing.T) {
 	}
 }
 
-func TestHandlerGetByIdNotFound(t *testing.T) {
+func TestRoleHandlerGetByIdNotFound(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
-	roleID := strconv.Itoa(int(testRoleID))
-	token, err := util.CreateJWTToken(claims)
+	roleID := strconv.Itoa(int(testAdminRoleID))
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -139,15 +148,18 @@ func TestHandlerGetByIdNotFound(t *testing.T) {
 	}
 }
 
-func TestHandlerGetByIdUnauthorized(t *testing.T) {
-	seeder.NewSeeder().DeleteAll()
-
+func TestRoleHandlerGetByIdUnauthorized(t *testing.T) {
+	token, err := util.CreateJWTToken(userClaims)
+	if err != nil {
+		t.Fatal(err)
+	}
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
-	roleID := strconv.Itoa(int(testRoleID))
+	c.SetPath("/api/v1/roles")
+	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	c.SetPath("/api/v1/roles")
 	c.SetParamNames("id")
-	c.SetParamValues(roleID)
+	c.SetParamValues(strconv.Itoa(int(testAdminRoleID)))
 
 	// testing
 	asserts := assert.New(t)
@@ -158,13 +170,13 @@ func TestHandlerGetByIdUnauthorized(t *testing.T) {
 	}
 }
 
-func TestHandlerGetByIdSuccess(t *testing.T) {
+func TestRoleHandlerGetByIdSuccess(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
 
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
-	roleID := strconv.Itoa(int(testRoleID))
-	token, err := util.CreateJWTToken(claims)
+	roleID := strconv.Itoa(int(testAdminRoleID))
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -185,10 +197,10 @@ func TestHandlerGetByIdSuccess(t *testing.T) {
 	}
 }
 
-func TestHandlerUpdateByIdInvalidPayload(t *testing.T) {
+func TestRoleHandlerUpdateByIdInvalidPayload(t *testing.T) {
 	c, rec := echoMock.RequestMock(http.MethodPut, "/", nil)
 	roleID := "a"
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -208,7 +220,7 @@ func TestHandlerUpdateByIdInvalidPayload(t *testing.T) {
 	}
 }
 
-func TestHandlerUpdateByIdNotFound(t *testing.T) {
+func TestRoleHandlerUpdateByIdNotFound(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 
 	payload, err := json.Marshal(testUpdatePayload)
@@ -216,8 +228,8 @@ func TestHandlerUpdateByIdNotFound(t *testing.T) {
 		t.Fatal(err)
 	}
 	c, rec := echoMock.RequestMock(http.MethodPut, "/", bytes.NewBuffer(payload))
-	roleID := strconv.Itoa(int(testRoleID))
-	token, err := util.CreateJWTToken(claims)
+	roleID := strconv.Itoa(int(testAdminRoleID))
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -237,15 +249,18 @@ func TestHandlerUpdateByIdNotFound(t *testing.T) {
 		asserts.Contains(body, "Data not found")
 	}
 }
-func TestHandlerUpdateByIdUnauthorized(t *testing.T) {
-	seeder.NewSeeder().DeleteAll()
-
-	c, rec := echoMock.RequestMock(http.MethodPut, "/", nil)
-	roleID := strconv.Itoa(int(testRoleID))
+func TestRoleHandlerUpdateByIdUnauthorized(t *testing.T) {
+	token, err := util.CreateJWTToken(userClaims)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
+	c.SetPath("/api/v1/roles")
+	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	c.SetPath("/api/v1/roles")
 	c.SetParamNames("id")
-	c.SetParamValues(roleID)
+	c.SetParamValues(strconv.Itoa(int(testAdminRoleID)))
 
 	// testing
 	asserts := assert.New(t)
@@ -256,7 +271,7 @@ func TestHandlerUpdateByIdUnauthorized(t *testing.T) {
 	}
 }
 
-func TestHandlerUpdateByIdSuccess(t *testing.T) {
+func TestRoleHandlerUpdateByIdSuccess(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
 
@@ -265,8 +280,8 @@ func TestHandlerUpdateByIdSuccess(t *testing.T) {
 		t.Fatal(err)
 	}
 	c, rec := echoMock.RequestMock(http.MethodPut, "/", bytes.NewBuffer(payload))
-	roleID := strconv.Itoa(int(testRoleID))
-	token, err := util.CreateJWTToken(claims)
+	roleID := strconv.Itoa(int(testAdminRoleID))
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -288,10 +303,10 @@ func TestHandlerUpdateByIdSuccess(t *testing.T) {
 	}
 }
 
-func TestHandlerDeleteByIdInvalidPayload(t *testing.T) {
+func TestRoleHandlerDeleteByIdInvalidPayload(t *testing.T) {
 	c, rec := echoMock.RequestMock(http.MethodDelete, "/", nil)
 	roleID := "a"
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -311,12 +326,12 @@ func TestHandlerDeleteByIdInvalidPayload(t *testing.T) {
 	}
 }
 
-func TestHandlerDeleteByIdNotFound(t *testing.T) {
+func TestRoleHandlerDeleteByIdNotFound(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 
 	c, rec := echoMock.RequestMock(http.MethodDelete, "/", nil)
-	roleID := strconv.Itoa(int(testRoleID))
-	token, err := util.CreateJWTToken(claims)
+	roleID := strconv.Itoa(int(testAdminRoleID))
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -336,15 +351,18 @@ func TestHandlerDeleteByIdNotFound(t *testing.T) {
 	}
 }
 
-func TestHandlerDeleteByIdUnauthorized(t *testing.T) {
-	seeder.NewSeeder().DeleteAll()
+func TestRoleHandlerDeleteByIdUnauthorized(t *testing.T) {
+	token, err := util.CreateJWTToken(userClaims)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	c, rec := echoMock.RequestMock(http.MethodDelete, "/", nil)
-	roleID := strconv.Itoa(int(testRoleID))
 
 	c.SetPath("/api/v1/roles")
 	c.SetParamNames("id")
-	c.SetParamValues(roleID)
+	c.SetParamValues(strconv.Itoa(int(testAdminRoleID)))
+	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	// testing
 	asserts := assert.New(t)
@@ -355,13 +373,13 @@ func TestHandlerDeleteByIdUnauthorized(t *testing.T) {
 	}
 }
 
-func TestHandlerDeleteByIdSuccess(t *testing.T) {
+func TestRoleHandlerDeleteByIdSuccess(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
 
 	c, rec := echoMock.RequestMock(http.MethodDelete, "/", nil)
-	roleID := strconv.Itoa(int(testRoleID))
-	token, err := util.CreateJWTToken(claims)
+	roleID := strconv.Itoa(int(testAdminRoleID))
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -383,8 +401,8 @@ func TestHandlerDeleteByIdSuccess(t *testing.T) {
 	}
 }
 
-func TestHandlerCreateInvalidPayload(t *testing.T) {
-	token, err := util.CreateJWTToken(claims)
+func TestRoleHandlerCreateInvalidPayload(t *testing.T) {
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -409,15 +427,15 @@ func TestHandlerCreateInvalidPayload(t *testing.T) {
 	}
 }
 
-func TestHandlerCreateRoleAlreadyExist(t *testing.T) {
+func TestRoleHandlerCreateRoleAlreadyExist(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
 
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
-	name := "Admin"
+	name := enum.Role(testAdminRoleID).String()
 	payload, err := json.Marshal(dto.CreateRoleRequestBody{Name: &name})
 	if err != nil {
 		t.Fatal(err)
@@ -439,7 +457,11 @@ func TestHandlerCreateRoleAlreadyExist(t *testing.T) {
 	}
 }
 
-func TestHandlerCreateUnauthorized(t *testing.T) {
+func TestRoleHandlerCreateUnauthorized(t *testing.T) {
+	token, err := util.CreateJWTToken(userClaims)
+	if err != nil {
+		t.Fatal(err)
+	}
 	payload, err := json.Marshal(testCreatePayload)
 	if err != nil {
 		t.Fatal(err)
@@ -449,6 +471,7 @@ func TestHandlerCreateUnauthorized(t *testing.T) {
 
 	c.SetPath("/api/v1/roles")
 	c.Request().Header.Set("Content-Type", "application/json")
+	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	// testing
 	asserts := assert.New(t)
@@ -460,10 +483,10 @@ func TestHandlerCreateUnauthorized(t *testing.T) {
 	}
 }
 
-func TestHandlerCreateSuccess(t *testing.T) {
+func TestRoleHandlerCreateSuccess(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 
-	token, err := util.CreateJWTToken(claims)
+	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -6,6 +6,7 @@ import (
 
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/dto"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/factory"
+	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/pkg/enum"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/pkg/util"
 	pkgdto "github.com/Alterra-DataOn-Kelompok-5/employee-service/pkg/dto"
 	res "github.com/Alterra-DataOn-Kelompok-5/employee-service/pkg/util/response"
@@ -25,7 +26,7 @@ func NewHandler(f *factory.Factory) *handler {
 func (h *handler) Get(c echo.Context) error {
 	authHeader := c.Request().Header.Get("Authorization")
 	jwtClaims, err := util.ParseJWTToken(authHeader)
-	if err != nil {
+	if (err != nil) || (jwtClaims.RoleID != uint(enum.Admin)) {
 		return res.ErrorBuilder(&res.ErrorConstant.Unauthorized, err).Send(c)
 	}
 
@@ -51,7 +52,7 @@ func (h *handler) Get(c echo.Context) error {
 func (h *handler) GetById(c echo.Context) error {
 	authHeader := c.Request().Header.Get("Authorization")
 	jwtClaims, err := util.ParseJWTToken(authHeader)
-	if err != nil {
+	if (err != nil) || (jwtClaims.RoleID != uint(enum.Admin)) {
 		return res.ErrorBuilder(&res.ErrorConstant.Unauthorized, err).Send(c)
 	}
 
@@ -76,7 +77,7 @@ func (h *handler) GetById(c echo.Context) error {
 func (h *handler) UpdateById(c echo.Context) error {
 	authHeader := c.Request().Header.Get("Authorization")
 	jwtClaims, err := util.ParseJWTToken(authHeader)
-	if err != nil {
+	if (err != nil) || (jwtClaims.RoleID != uint(enum.Admin)) {
 		return res.ErrorBuilder(&res.ErrorConstant.Unauthorized, err).Send(c)
 	}
 
@@ -100,7 +101,7 @@ func (h *handler) UpdateById(c echo.Context) error {
 func (h *handler) DeleteById(c echo.Context) error {
 	authHeader := c.Request().Header.Get("Authorization")
 	jwtClaims, err := util.ParseJWTToken(authHeader)
-	if err != nil {
+	if (err != nil) || (jwtClaims.RoleID != uint(enum.Admin)) {
 		return res.ErrorBuilder(&res.ErrorConstant.Unauthorized, err).Send(c)
 	}
 
@@ -124,7 +125,7 @@ func (h *handler) DeleteById(c echo.Context) error {
 func (h *handler) Create(c echo.Context) error {
 	authHeader := c.Request().Header.Get("Authorization")
 	jwtClaims, err := util.ParseJWTToken(authHeader)
-	if err != nil {
+	if (err != nil) || (jwtClaims.RoleID != uint(enum.Admin)) {
 		return res.ErrorBuilder(&res.ErrorConstant.Unauthorized, err).Send(c)
 	}
 

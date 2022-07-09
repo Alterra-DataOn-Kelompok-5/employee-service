@@ -8,16 +8,17 @@ import (
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/database/seeder"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/dto"
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/factory"
+	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/pkg/enum"
 	pkgdto "github.com/Alterra-DataOn-Kelompok-5/employee-service/pkg/dto"
 	"github.com/stretchr/testify/assert"
 )
 
 var (
-	ctx             = context.Background()
+	ctx         = context.Background()
 	roleService = NewService(factory.NewFactory())
 )
 
-func TestServiceFindAllSuccess(t *testing.T) {
+func TestRoleServiceFindAllSuccess(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
@@ -38,7 +39,7 @@ func TestServiceFindAllSuccess(t *testing.T) {
 		asserts.NotEmpty(val.ID)
 	}
 }
-func TestServiceFindByIdSuccess(t *testing.T) {
+func TestRoleServiceFindByIdSuccess(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
@@ -56,7 +57,7 @@ func TestServiceFindByIdSuccess(t *testing.T) {
 	asserts.Equal(uint(1), res.ID)
 }
 
-func TestServiceFindByIdRecordNotFound(t *testing.T) {
+func TestRoleServiceFindByIdRecordNotFound(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 
@@ -71,7 +72,7 @@ func TestServiceFindByIdRecordNotFound(t *testing.T) {
 	}
 }
 
-func TestServiceUpdataByIdSuccess(t *testing.T) {
+func TestRoleServiceUpdataByIdSuccess(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
@@ -92,7 +93,7 @@ func TestServiceUpdataByIdSuccess(t *testing.T) {
 	asserts.Equal(name, res.Name)
 }
 
-func TestServiceUpdateByIdRecordNotFound(t *testing.T) {
+func TestRoleServiceUpdateByIdRecordNotFound(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 
@@ -112,7 +113,7 @@ func TestServiceUpdateByIdRecordNotFound(t *testing.T) {
 	}
 }
 
-func TestServiceDeleteByIdSuccess(t *testing.T) {
+func TestRoleServiceDeleteByIdSuccess(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
@@ -130,7 +131,7 @@ func TestServiceDeleteByIdSuccess(t *testing.T) {
 	asserts.NotNil(res.DeletedAt)
 }
 
-func TestServiceDeleteByIdRecordNotFound(t *testing.T) {
+func TestRoleServiceDeleteByIdRecordNotFound(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 
@@ -146,13 +147,13 @@ func TestServiceDeleteByIdRecordNotFound(t *testing.T) {
 	}
 }
 
-func TestServiceCreateRoleSuccess(t *testing.T) {
+func TestRoleServiceCreateRoleSuccess(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 
 	var (
 		asserts = assert.New(t)
-		name = "Finance Dept."
+		name    = "Finance Dept."
 		payload = dto.CreateRoleRequestBody{
 			Name: &name,
 		}
@@ -166,14 +167,14 @@ func TestServiceCreateRoleSuccess(t *testing.T) {
 	asserts.Equal(*payload.Name, res.Name)
 }
 
-func TestServiceCreateRoleAlreadyExist(t *testing.T) {
+func TestRoleServiceCreateRoleAlreadyExist(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
 
 	var (
 		asserts = assert.New(t)
-		name = "Admin"
+		name    = enum.Role(testAdminRoleID).String()
 		payload = dto.CreateRoleRequestBody{
 			Name: &name,
 		}
