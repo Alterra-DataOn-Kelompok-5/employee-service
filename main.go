@@ -1,3 +1,21 @@
+// Package classification Employee Service API
+//
+// This is one of services of Meeting Room Application. The purpose of this service
+// is to provide endpoints for user to sign up & sign in, and for admin to manage user.
+//
+//      Schemes: http
+//      Host: localhost
+//      BasePath: /
+//      Version: 1.0.0
+//      Contact: Azka Fadhli Ramadhan<azkafr92@gmail.com>
+//
+//     Consumes:
+//     - application/json
+//
+//     Produces:
+//         application/json
+//
+// swagger:meta
 package main
 
 import (

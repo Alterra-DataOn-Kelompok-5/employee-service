@@ -4,16 +4,21 @@ import (
 	"math"
 )
 
+// swagger:parameters FindEmployees
 type Pagination struct {
+	// in: query
+	// items.page.pattern: \d+
+	// items.page_size.pattern: \d+
 	Page     *int `query:"page" json:"page"`
 	PageSize *int `query:"page_size" json:"page_size"`
 }
 
+// swagger:parameters FindEmployees
 type SearchGetRequest struct {
+	// in: query
+	// items.search.pattern: \w+
 	Pagination
 	Search   string   `query:"search"`
-	AscField []string `query:"asc_field"`
-	DscField []string `query:"dsc_field"`
 }
 
 type SearchGetResponse[T any] struct {

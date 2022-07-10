@@ -7,17 +7,20 @@ import (
 )
 
 type (
-	UpdateEmployeeRequestBody struct {
-		ID         *uint   `param:"id" validate:"required"`
-		Fullname   *string `json:"fullname" validate:"omitempty"`
-		Email      *string `json:"email" validate:"omitempty,email"`
-		Password   *string `json:"password" validate:"omitempty"`
-		RoleID     *uint   `json:"role_id" validate:"omitempty"`
-		DivisionID *uint   `json:"division_id" validate:"omitempty"`
+	EmployeeDetailResponse struct {
+		EmployeeResponse
+		Role     RoleResponse     `json:"role"`
+		Division DivisionResponse `json:"division"`
 	}
+	// Find employees responses
+	// 
+	// swagger:model  
 	EmployeeResponse struct {
+		// required: true
 		ID       uint   `json:"id"`
+		// required: true
 		Fullname string `json:"fullname"`
+		// required: true
 		Email    string `json:"email"`
 	}
 	EmployeeWithJWTResponse struct {
@@ -30,9 +33,12 @@ type (
 		UpdatedAt time.Time       `json:"updated_at"`
 		DeletedAt *gorm.DeletedAt `json:"deleted_at"`
 	}
-	EmployeeDetailResponse struct {
-		EmployeeResponse
-		Role     RoleResponse     `json:"role"`
-		Division DivisionResponse `json:"division"`
+	UpdateEmployeeRequestBody struct {
+		ID         *uint   `param:"id" validate:"required"`
+		Fullname   *string `json:"fullname" validate:"omitempty"`
+		Email      *string `json:"email" validate:"omitempty,email"`
+		Password   *string `json:"password" validate:"omitempty"`
+		RoleID     *uint   `json:"role_id" validate:"omitempty"`
+		DivisionID *uint   `json:"division_id" validate:"omitempty"`
 	}
 )

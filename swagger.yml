@@ -1,0 +1,120 @@
+basePath: /
+consumes:
+- application/json
+definitions:
+  EmployeeResponse:
+    description: Find employees responses
+    properties:
+      email:
+        type: string
+        x-go-name: Email
+      fullname:
+        type: string
+        x-go-name: Fullname
+      id:
+        format: uint64
+        type: integer
+        x-go-name: ID
+    required:
+    - id
+    - fullname
+    - email
+    type: object
+    x-go-package: github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/dto
+  Meta:
+    properties:
+      info:
+        $ref: '#/definitions/PaginationInfo'
+      message:
+        type: string
+        x-go-name: Message
+      success:
+        type: boolean
+        x-go-name: Success
+    type: object
+    x-go-package: github.com/Alterra-DataOn-Kelompok-5/employee-service/pkg/util/response
+  PaginationInfo:
+    properties:
+      count:
+        format: int64
+        type: integer
+        x-go-name: Count
+      more_records:
+        type: boolean
+        x-go-name: MoreRecords
+      page:
+        description: 'in: query'
+        format: int64
+        pattern: \d+
+        type: integer
+        x-go-name: Page
+      page_size:
+        format: int64
+        type: integer
+        x-go-name: PageSize
+      total_page:
+        format: int64
+        type: integer
+        x-go-name: TotalPage
+    type: object
+    x-go-package: github.com/Alterra-DataOn-Kelompok-5/employee-service/pkg/dto
+  successResponse:
+    properties:
+      data:
+        type: object
+        x-go-name: Data
+      meta:
+        $ref: '#/definitions/Meta'
+    type: object
+    x-go-package: github.com/Alterra-DataOn-Kelompok-5/employee-service/pkg/util/response
+host: localhost
+info:
+  contact:
+    email: azkafr92@gmail.com
+    name: Azka Fadhli Ramadhan
+  description: |-
+    This is one of services of Meeting Room Application. The purpose of this service
+    is to provide endpoints for user to sign up & sign in, and for admin to manage user.
+  title: Employee Service API
+  version: 1.0.0
+paths:
+  /v1/api/employees:
+    get:
+      description: List employees that paginated and filtered by `search` query
+      operationId: FindEmployees
+      parameters:
+      - format: int64
+        in: query
+        name: page
+        pattern: \d+
+        type: integer
+        x-go-name: Page
+      - format: int64
+        in: query
+        name: page_size
+        type: integer
+        x-go-name: PageSize
+      - in: query
+        name: Search
+        type: string
+      responses:
+        "200":
+          $ref: '#/responses/successResponse'
+      security:
+      - bearerAuth: []
+      tags:
+      - employees
+produces:
+- application/json
+responses:
+  successResponse:
+    description: ""
+    headers:
+      code:
+        format: int64
+        type: integer
+    schema:
+      $ref: '#/definitions/successResponse'
+schemes:
+- http
+swagger: "2.0"

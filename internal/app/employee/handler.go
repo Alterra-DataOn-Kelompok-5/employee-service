@@ -24,6 +24,14 @@ func NewHandler(f *factory.Factory) *handler {
 	}
 }
 
+// swagger:route GET /v1/api/employees employees FindEmployees
+// List employees that paginated and filtered by `search` query
+//
+//   Security:
+//     bearerAuth:
+// 
+//   Responses:
+//     200: successResponse
 func (h *handler) Get(c echo.Context) error {
 	authHeader := c.Request().Header.Get("Authorization")
 	_, err := util.ParseJWTToken(authHeader)

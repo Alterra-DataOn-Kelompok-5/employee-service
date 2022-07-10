@@ -29,7 +29,10 @@ type successResponse struct {
 	Data interface{} `json:"data"`
 }
 
+
+// swagger:response successResponse
 type Success struct {
+	// in: body
 	Response successResponse `json:"response"`
 	Code     int             `json:"code"`
 }
