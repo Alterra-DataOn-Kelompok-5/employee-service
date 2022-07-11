@@ -37,7 +37,7 @@ func (r *division) FindAll(ctx context.Context, payload *pkgdto.SearchGetRequest
 
 	if payload.Search != "" {
 		search := "%" + strings.ToLower(payload.Search) + "%"
-		query = query.Where("lower(name) LIKE ?", search, search)
+		query = query.Where("lower(name) LIKE ?", search)
 	}
 
 	countQuery := query

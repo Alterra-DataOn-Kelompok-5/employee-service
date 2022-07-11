@@ -72,7 +72,7 @@ func TestRoleServiceFindByIdRecordNotFound(t *testing.T) {
 	}
 }
 
-func TestRoleServiceUpdataByIdSuccess(t *testing.T) {
+func TestRoleServiceUpdateByIdSuccess(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()

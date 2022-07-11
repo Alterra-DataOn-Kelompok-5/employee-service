@@ -215,7 +215,7 @@ func TestEmployeeHandlerUpdateByIdNotFound(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	c.SetPath("/employees")
+	c.SetPath("/api/v1/employees")
 	c.SetParamNames("id")
 	c.SetParamValues(strconv.Itoa(int(testEmployeeID)))
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
@@ -264,7 +264,7 @@ func TestEmployeeHandlerUpdateByIdSuccess(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	c.SetPath("/employees")
+	c.SetPath("/api/v1/employees")
 	c.SetParamNames("id")
 	c.SetParamValues(strconv.Itoa(int(userClaims.UserID)))
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
@@ -291,7 +291,7 @@ func TestEmployeeHandlerDeleteByIdInvalidPayload(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	c.SetPath("/employees")
+	c.SetPath("/api/v1/employees")
 	c.SetParamNames("id")
 	c.SetParamValues(employeeID)
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
@@ -315,7 +315,7 @@ func TestEmployeeHandlerDeleteByIdNotFound(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	c.SetPath("/employees")
+	c.SetPath("/api/v1/employees")
 	c.SetParamNames("id")
 	c.SetParamValues(strconv.Itoa(int(testEmployeeID)))
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
@@ -358,7 +358,7 @@ func TestEmployeeHandlerDeleteByIdSuccess(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	c.SetPath("/employees")
+	c.SetPath("/api/v1/employees")
 	c.SetParamNames("id")
 	c.SetParamValues(strconv.Itoa(int(testEmployeeID)))
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))

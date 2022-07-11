@@ -60,7 +60,7 @@ func TestDivisionServiceFindByIdRecordNotFound(t *testing.T) {
 	}
 }
 
-func TestDivisionServiceUpdataByIdSuccess(t *testing.T) {
+func TestDivisionServiceUpdateByIdSuccess(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()

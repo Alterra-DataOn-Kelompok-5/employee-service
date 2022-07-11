@@ -225,7 +225,7 @@ func TestDivisionHandlerUpdateByIdNotFound(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	c.SetPath("/divisions")
+	c.SetPath("/api/v1/divisions")
 	c.SetParamNames("id")
 	c.SetParamValues(divisionID)
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
@@ -280,7 +280,7 @@ func TestDivisionHandlerUpdateByIdSuccess(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	c.SetPath("/divisions")
+	c.SetPath("/api/v1/divisions")
 	c.SetParamNames("id")
 	c.SetParamValues(divisionID)
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
@@ -305,7 +305,7 @@ func TestDivisionHandlerDeleteByIdInvalidPayload(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	c.SetPath("/divisions")
+	c.SetPath("/api/v1/divisions")
 	c.SetParamNames("id")
 	c.SetParamValues(divisionID)
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
@@ -330,7 +330,7 @@ func TestDivisionHandlerDeleteByIdNotFound(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	c.SetPath("/divisions")
+	c.SetPath("/api/v1/divisions")
 	c.SetParamNames("id")
 	c.SetParamValues(divisionID)
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
@@ -381,7 +381,7 @@ func TestDivisionHandlerDeleteByIdSuccess(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	c.SetPath("/divisions")
+	c.SetPath("/api/v1/divisions")
 	c.SetParamNames("id")
 	c.SetParamValues(divisionID)
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))

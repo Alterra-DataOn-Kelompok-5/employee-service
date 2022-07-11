@@ -234,7 +234,7 @@ func TestRoleHandlerUpdateByIdNotFound(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	c.SetPath("/roles")
+	c.SetPath("/v1/api/roles")
 	c.SetParamNames("id")
 	c.SetParamValues(roleID)
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
@@ -250,17 +250,17 @@ func TestRoleHandlerUpdateByIdNotFound(t *testing.T) {
 	}
 }
 func TestRoleHandlerUpdateByIdUnauthorized(t *testing.T) {
-	token, err := util.CreateJWTToken(userClaims)
-	if err != nil {
-		t.Fatal(err)
-	}
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
-	c.SetPath("/api/v1/roles")
-	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	c.SetPath("/api/v1/roles")
 	c.SetParamNames("id")
 	c.SetParamValues(strconv.Itoa(int(testAdminRoleID)))
+
+	token, err := util.CreateJWTToken(userClaims)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	// testing
 	asserts := assert.New(t)
@@ -286,7 +286,7 @@ func TestRoleHandlerUpdateByIdSuccess(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	c.SetPath("/roles")
+	c.SetPath("/api/v1/roles")
 	c.SetParamNames("id")
 	c.SetParamValues(roleID)
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
@@ -311,7 +311,7 @@ func TestRoleHandlerDeleteByIdInvalidPayload(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	c.SetPath("/roles")
+	c.SetPath("/api/v1/roles")
 	c.SetParamNames("id")
 	c.SetParamValues(roleID)
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
@@ -336,7 +336,7 @@ func TestRoleHandlerDeleteByIdNotFound(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	c.SetPath("/roles")
+	c.SetPath("/api/v1/roles")
 	c.SetParamNames("id")
 	c.SetParamValues(roleID)
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
@@ -384,7 +384,7 @@ func TestRoleHandlerDeleteByIdSuccess(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	c.SetPath("/roles")
+	c.SetPath("/api/v1/roles")
 	c.SetParamNames("id")
 	c.SetParamValues(roleID)
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))

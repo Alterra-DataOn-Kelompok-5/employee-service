@@ -26,7 +26,7 @@ func TestAuthHandlerLoginByEmailAndPasswordInvalidPayload(t *testing.T) {
 	e := echo.New()
 	echoMock := mocks.EchoMock{E: e}
 	c, rec := echoMock.RequestMock(http.MethodPost, "/", nil)
-	c.SetPath("/auth/login")
+	c.SetPath("/api/v1/auth/login")
 
 	// setup handler
 	asserts := assert.New(t)
@@ -62,7 +62,7 @@ func TestAuthHandlerLoginByEmailAndPasswordUnmatchedEmailAndPassword(t *testing.
 	}
 	c, rec := echoMock.RequestMock(http.MethodPost, "/", bytes.NewBuffer(payload))
 	c.Request().Header.Set("Content-Type", "application/json")
-	c.SetPath("/auth/login")
+	c.SetPath("/api/v1/auth/login")
 
 	// setup handler
 	asserts := assert.New(t)
@@ -98,7 +98,7 @@ func TestAuthHandlerLoginByEmailAndPasswordSuccess(t *testing.T) {
 	}
 	c, rec := echoMock.RequestMock(http.MethodPost, "/", bytes.NewBuffer(payload))
 	c.Request().Header.Set("Content-Type", "application/json")
-	c.SetPath("/auth/login")
+	c.SetPath("/api/v1/auth/login")
 
 	// setup handler
 	asserts := assert.New(t)
@@ -145,7 +145,7 @@ func TestAuthHandlerRegisterByEmailAndPasswordUserAlreadyExist(t *testing.T) {
 	}
 	c, rec := echoMock.RequestMock(http.MethodPost, "/", bytes.NewBuffer(payload))
 	c.Request().Header.Set("Content-Type", "application/json")
-	c.SetPath("/auth/signup")
+	c.SetPath("/api/v1/auth/signup")
 
 	// setup handler
 	asserts := assert.New(t)
@@ -187,7 +187,7 @@ func TestAuthHandlerRegisterByEmailAndPasswordInvalidPayload(t *testing.T) {
 	}
 	c, rec := echoMock.RequestMock(http.MethodPost, "/", bytes.NewBuffer(payload))
 	c.Request().Header.Set("Content-Type", "application/json")
-	c.SetPath("/auth/signup")
+	c.SetPath("/api/v1/auth/signup")
 
 	// setup handler
 	asserts := assert.New(t)
@@ -231,7 +231,7 @@ func TestAuthHandlerRegisterByEmailAndPasswordSuccess(t *testing.T) {
 	}
 	c, rec := echoMock.RequestMock(http.MethodPost, "/", bytes.NewBuffer(payload))
 	c.Request().Header.Set("Content-Type", "application/json")
-	c.SetPath("/auth/signup")
+	c.SetPath("/api/v1/auth/signup")
 
 	// setup handler
 	asserts := assert.New(t)
