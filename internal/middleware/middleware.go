@@ -1,14 +1,25 @@
 package middleware
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/Alterra-DataOn-Kelompok-5/employee-service/internal/dto"
+	"github.com/Alterra-DataOn-Kelompok-5/employee-service/pkg/util"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 func LogMiddlewares(e *echo.Echo) {
+	fileName := util.Getenv("LOG_FILE", "employee-logfile.log")
+	f, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		panic(fmt.Sprintf("error opening file: %v", err))
+	}
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: `[${time_rfc3339}] ${status} ${method} ${host}${uri} ${latency_human}` + "\n",
+		CustomTimeFormat: "2006/01/02 15:04:05",
+		Output:           f,
 	}))
 }
 
