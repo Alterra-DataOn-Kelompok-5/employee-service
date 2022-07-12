@@ -1,3 +1,4 @@
+IMAGE_TAG_NAME=azkafr92/meeting-room-management-employee-service:latest
 build:
 	go build -o ./employee-service
 
@@ -18,3 +19,9 @@ test-all:
 
 up:
 	docker compose up -d && docker compose start
+
+build-image:
+	docker build . -t ${IMAGE_TAG_NAME} -f docker/go/Dockerfile
+
+push-image:
+	docker push ${IMAGE_TAG_NAME}

@@ -1,1 +1,4 @@
 .env
+.production.env
+.dev.env
+*.log
